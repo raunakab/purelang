@@ -86,10 +86,9 @@ impl Paren_x64 {
                             initialized_registers.insert(*reg);
                             Ok(())
                         },
-                        false => Err(format!(
-                            "{:?} is not initialized",
-                            reg_other
-                        )),
+                        false => {
+                            Err(format!("{:?} is not initialized", reg_other))
+                        },
                     }
                 },
                 S::set_reg_binop_reg_int32 { reg, .. } => {
@@ -104,10 +103,9 @@ impl Paren_x64 {
                             initialized_registers.insert(*reg);
                             Ok(())
                         },
-                        false => Err(format!(
-                            "{:?} is not initialized",
-                            reg_other
-                        )),
+                        false => {
+                            Err(format!("{:?} is not initialized", reg_other))
+                        },
                     }
                 },
             }
@@ -122,8 +120,7 @@ impl Paren_x64 {
                     let errors = ss
                         .iter()
                         .filter_map(|s| {
-                            let result =
-                                check_init_s(s, initialized_registers);
+                            let result = check_init_s(s, initialized_registers);
                             match result {
                                 Ok(()) => None,
                                 Err(err) => Some(err),
@@ -142,10 +139,9 @@ impl Paren_x64 {
                     match rax_is_initialized {
                         // true => Ok(Paren_x64 { p }),
                         true => Ok(()),
-                        false => Err(format!(
-                            "{:?} is not initialized",
-                            Regs::rax
-                        )),
+                        false => {
+                            Err(format!("{:?} is not initialized", Regs::rax))
+                        },
                     }
                 },
             }
@@ -187,10 +183,7 @@ impl ToString for Paren_x64 {
                     reg_other,
                 } => {
                     let binop_as_string = generate_binop(binop);
-                    format!(
-                        "{:?} {:?}, {:?}",
-                        binop_as_string, reg, reg_other
-                    )
+                    format!("{:?} {:?}, {:?}", binop_as_string, reg, reg_other)
                 },
             }
         }
