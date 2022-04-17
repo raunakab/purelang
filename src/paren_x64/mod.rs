@@ -1,3 +1,6 @@
+#[cfg(test)]
+mod tests;
+
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::hash::Hash;
@@ -261,6 +264,3 @@ pub enum Binop {
     plus,
     multiply,
 }
-
-#[cfg(test)]
-mod tests;
