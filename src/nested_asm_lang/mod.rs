@@ -15,9 +15,13 @@ pub struct NestedAsmLang {
 /// Flatten all nested begin expressions.
 impl From<NestedAsmLang> for target::ParaAsmLang {
     fn from(NestedAsmLang { p }: NestedAsmLang) -> Self {
-        fn flatten_p(P { tail }: self::P) -> target::P {
-            let tail = Box::new(tail);
-            flatten_tail(tail)
+        fn flatten_p(p: self::P) -> target::P {
+            match p {
+                self::P::tail { tail } => {
+                    let tail = Box::new(tail);
+                    flatten_tail(tail)
+                },
+            }
         }
 
         fn flatten_tail(tail: Box<self::Tail>) -> target::P {

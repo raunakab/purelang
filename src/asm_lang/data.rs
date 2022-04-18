@@ -1,7 +1,10 @@
 use crate::cpsc411;
 
 pub enum P {
-    tail { tail: Tail },
+    module {
+        info: cpsc411::Info<super::target::Loc>,
+        tail: Tail,
+    },
 }
 
 pub enum Tail {
@@ -15,12 +18,12 @@ pub enum Tail {
 }
 
 pub enum Effect {
-    set_loc_triv {
-        loc: Loc,
+    set_aloc_triv {
+        aloc: cpsc411::Aloc,
         triv: Triv,
     },
-    set_loc_binop_triv {
-        loc: Loc,
+    set_aloc_binop_aloc_triv {
+        aloc: cpsc411::Aloc,
         binop: cpsc411::Binop,
         triv: Triv,
     },
@@ -29,13 +32,7 @@ pub enum Effect {
     },
 }
 
-#[derive(Clone)]
-pub enum Loc {
-    reg { reg: cpsc411::Reg },
-    fvar { fvar: cpsc411::Fvar },
-}
-
 pub enum Triv {
     int64 { int64: i64 },
-    loc { loc: Loc },
+    aloc { aloc: cpsc411::Aloc },
 }

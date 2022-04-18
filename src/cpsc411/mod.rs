@@ -1,3 +1,15 @@
+use std::collections::HashMap;
+use std::collections::HashSet;
+use std::sync::Arc;
+use std::sync::Mutex;
+
+use lazy_static::lazy_static;
+
+lazy_static! {
+    static ref FVAR_INDEX: Arc<Mutex<usize>> = Arc::new(Mutex::new(0));
+}
+
+#[derive(Clone, Hash, PartialEq, Eq)]
 pub struct Aloc {
     pub name: String,
     pub index: usize,
@@ -42,6 +54,22 @@ pub enum Binop {
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Fvar {
     pub index: usize,
+}
+
+impl Fvar {
+    pub fn fresh() -> Self {
+        let mut fvar_index = FVAR_INDEX.lock().unwrap();
+        let index = *fvar_index;
+        *fvar_index += 1;
+
+        Self { index }
+    }
+}
+
+#[derive(Default)]
+pub struct Info<Loc> {
+    pub locals: HashSet<Aloc>,
+    pub assignment: HashMap<Aloc, Loc>,
 }
 
 pub trait Check: Sized {
