@@ -296,10 +296,7 @@ impl From<ParenX64> for String {
                 self::S::set_reg_binop_reg_loc { reg, binop, loc } => {
                     let binop_as_string = generate_binop(binop);
                     let loc_as_string = generate_loc(loc);
-                    format!(
-                        "{} {:?}, {}",
-                        binop_as_string, reg, loc_as_string
-                    )
+                    format!("{} {:?}, {}", binop_as_string, reg, loc_as_string)
                 },
             }
         }
@@ -320,4 +317,8 @@ impl From<ParenX64> for String {
 }
 
 pass!(generate_x64, self::ParenX64, String);
-pass!(interpret, self::ParenX64, <ParenX64 as cpsc411::Interpret>::Output);
+pass!(
+    interpret,
+    self::ParenX64,
+    <ParenX64 as cpsc411::Interpret>::Output
+);

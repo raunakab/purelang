@@ -30,7 +30,7 @@ use paren_x64::ParenX64 as TargetLang;
 /// code.
 pub fn purelang_c(program: SourceLang) -> TargetLang {
     program
-        .assign_homes()
+        .assign_homes_opt()
         .flatten_begins()
         .patch_instructions()
         .implement_fvars()
