@@ -1,16 +1,18 @@
-use crate::paren_x64::Binop;
-use crate::paren_x64::Paren_x64;
-use crate::paren_x64::Regs;
-use crate::paren_x64::P;
-use crate::paren_x64::S;
+use crate::cpsc411::Binop;
+use crate::cpsc411::Interpret;
+use crate::cpsc411::Reg;
+use crate::paren_x64::data::Triv;
+use crate::paren_x64::data::P;
+use crate::paren_x64::data::S;
+use crate::paren_x64::ParenX64;
 
 #[test]
 fn interp_basic() {
-    let program = Paren_x64 {
+    let program = ParenX64 {
         p: P::begin {
-            ss: vec![S::set_reg_int64 {
-                reg: Regs::rax,
-                int64: 0,
+            ss: vec![S::set_reg_triv {
+                reg: Reg::rax,
+                triv: Triv::int64 { int64: 0 },
             }],
         },
     };
@@ -22,16 +24,16 @@ fn interp_basic() {
 
 #[test]
 fn interp_intermediary() {
-    let program = Paren_x64 {
+    let program = ParenX64 {
         p: P::begin {
             ss: vec![
-                S::set_reg_int64 {
-                    reg: Regs::rbx,
-                    int64: 12,
+                S::set_reg_triv {
+                    reg: Reg::rbx,
+                    triv: Triv::int64 { int64: 12 },
                 },
-                S::set_reg_int64 {
-                    reg: Regs::rax,
-                    int64: 0,
+                S::set_reg_triv {
+                    reg: Reg::rax,
+                    triv: Triv::int64 { int64: 0 },
                 },
             ],
         },
@@ -44,16 +46,16 @@ fn interp_intermediary() {
 
 #[test]
 fn interp_by_setting_with_another_register() {
-    let program = Paren_x64 {
+    let program = ParenX64 {
         p: P::begin {
             ss: vec![
-                S::set_reg_int64 {
-                    reg: Regs::rbx,
-                    int64: 12,
+                S::set_reg_triv {
+                    reg: Reg::rbx,
+                    triv: Triv::int64 { int64: 12 },
                 },
-                S::set_reg_reg {
-                    reg: Regs::rax,
-                    reg_other: Regs::rbx,
+                S::set_reg_triv {
+                    reg: Reg::rax,
+                    triv: Triv::reg { reg: Reg::rbx },
                 },
             ],
         },
@@ -66,15 +68,15 @@ fn interp_by_setting_with_another_register() {
 
 #[test]
 fn interp_with_addition() {
-    let program = Paren_x64 {
+    let program = ParenX64 {
         p: P::begin {
             ss: vec![
-                S::set_reg_int64 {
-                    reg: Regs::rax,
-                    int64: 12,
+                S::set_reg_triv {
+                    reg: Reg::rax,
+                    triv: Triv::int64 { int64: 12 },
                 },
                 S::set_reg_binop_reg_int32 {
-                    reg: Regs::rax,
+                    reg: Reg::rax,
                     binop: Binop::plus,
                     int32: 1,
                 },
@@ -89,15 +91,15 @@ fn interp_with_addition() {
 
 #[test]
 fn interp_with_multiplication() {
-    let program = Paren_x64 {
+    let program = ParenX64 {
         p: P::begin {
             ss: vec![
-                S::set_reg_int64 {
-                    reg: Regs::rax,
-                    int64: 12,
+                S::set_reg_triv {
+                    reg: Reg::rax,
+                    triv: Triv::int64 { int64: 12 },
                 },
                 S::set_reg_binop_reg_int32 {
-                    reg: Regs::rax,
+                    reg: Reg::rax,
                     binop: Binop::multiply,
                     int32: 2,
                 },
