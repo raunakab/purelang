@@ -1,11 +1,7 @@
 pub struct Aloc {
-    name: String,
-    index: usize,
+    pub name: String,
+    pub index: usize,
 }
-
-// /// Can only be multiples of 8.
-// /// (i.e., 0, 8, 16, etc.)
-// type DispOffset = usize;
 
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 pub enum Reg {
@@ -27,10 +23,20 @@ pub enum Reg {
     r15,
 }
 
+impl Reg {
+    pub fn current_frame_base_pointer() -> Self {
+        Self::rbp
+    }
+}
+
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 pub enum Binop {
     plus,
     multiply,
+}
+
+pub struct Fvar {
+    pub index: usize,
 }
 
 pub trait Check: Sized {
