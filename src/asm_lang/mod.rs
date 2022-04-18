@@ -6,7 +6,7 @@ use std::hash::Hash;
 use crate::cpsc411::Aloc;
 
 pub struct AsmLang {
-    p: P,
+    pub p: P,
 }
 
 pub enum P {

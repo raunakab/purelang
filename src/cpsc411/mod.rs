@@ -27,6 +27,10 @@ impl Reg {
     pub fn current_frame_base_pointer() -> Self {
         Self::rbp
     }
+
+    pub fn current_auxiliary_registers() -> (Self, Self) {
+        (Self::r10, Self::r11)
+    }
 }
 
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
@@ -35,6 +39,7 @@ pub enum Binop {
     multiply,
 }
 
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Fvar {
     pub index: usize,
 }

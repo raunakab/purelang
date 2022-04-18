@@ -5,7 +5,6 @@ mod tests;
 pub use self::data::*;
 use crate::cpsc411;
 use crate::paren_x64 as target;
-use crate::paren_x64::ParenX64;
 
 pub struct ParenX64Fvars {
     pub p: self::P,
@@ -13,12 +12,12 @@ pub struct ParenX64Fvars {
 
 /// ImplementFvars: ParenX64Fvars -> ParenX64
 ///
-/// ### Purpose
+/// ### Purpose:
 /// Compiles the Paren-x64-fvars v2 to Paren-x64 v2 by reifying fvars
 /// into displacement mode operands. The pass should use
 /// current-frame-base-pointer-register.
-impl From<ParenX64Fvars> for ParenX64 {
-    fn from(paren_x64_fvars: ParenX64Fvars) -> Self {
+impl From<ParenX64Fvars> for target::ParenX64 {
+    fn from(ParenX64Fvars { p }: ParenX64Fvars) -> Self {
         fn implement_p(p: self::P) -> target::P {
             match p {
                 self::P::begin { ss } => {
@@ -85,7 +84,7 @@ impl From<ParenX64Fvars> for ParenX64 {
             }
         }
 
-        let p = implement_p(paren_x64_fvars.p);
+        let p = implement_p(p);
         Self { p }
     }
 }
