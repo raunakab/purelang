@@ -318,3 +318,5 @@ impl From<ParaAsmLang> for target::ParenX64Fvars {
         Self { p }
     }
 }
+
+pass!(patch_instructions, self::ParaAsmLang, target::ParenX64Fvars);

@@ -102,3 +102,5 @@ impl From<NestedAsmLang> for target::ParaAsmLang {
         Self { p }
     }
 }
+
+pass!(flatten_begins, self::NestedAsmLang, target::ParaAsmLang);

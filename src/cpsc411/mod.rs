@@ -3,16 +3,53 @@ use std::collections::HashSet;
 use std::sync::Arc;
 use std::sync::Mutex;
 
+use derivative::*;
 use lazy_static::lazy_static;
 
 lazy_static! {
     static ref FVAR_INDEX: Arc<Mutex<usize>> = Arc::new(Mutex::new(0));
+    static ref ALOC_INDEX: Arc<Mutex<usize>> = Arc::new(Mutex::new(0));
 }
 
-#[derive(Clone, Hash, PartialEq, Eq)]
+fn fresh_index(asbtract_index: &Arc<Mutex<usize>>) -> usize {
+    let mut abstract_index = asbtract_index.lock().unwrap();
+    let index = *abstract_index;
+    *abstract_index += 1;
+
+    index
+}
+
+#[derive(Derivative, Clone, Hash, PartialEq, Eq)]
+#[derivative(PartialOrd, Ord)]
 pub struct Aloc {
+    #[derivative(PartialOrd = "ignore", Ord = "ignore")]
     pub name: String,
+
     pub index: usize,
+}
+
+impl Aloc {
+    pub fn fresh() -> Self {
+        let default_name = "tmp";
+        let index = fresh_index(&ALOC_INDEX);
+
+        Self {
+            name: default_name.into(),
+            index,
+        }
+    }
+
+    pub fn fresh_with_name<I>(name: I) -> Self
+    where
+        I: Into<String>,
+    {
+        let index = fresh_index(&ALOC_INDEX);
+
+        Self {
+            name: name.into(),
+            index,
+        }
+    }
 }
 
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
@@ -45,7 +82,7 @@ impl Reg {
     }
 }
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Copy, Clone, Hash, PartialEq, Eq)]
 pub enum Binop {
     plus,
     multiply,
@@ -58,18 +95,23 @@ pub struct Fvar {
 
 impl Fvar {
     pub fn fresh() -> Self {
-        let mut fvar_index = FVAR_INDEX.lock().unwrap();
-        let index = *fvar_index;
-        *fvar_index += 1;
-
+        let index = fresh_index(&FVAR_INDEX);
         Self { index }
     }
 }
 
-#[derive(Default)]
 pub struct Info<Loc> {
     pub locals: HashSet<Aloc>,
     pub assignment: HashMap<Aloc, Loc>,
+}
+
+impl<Loc> Default for Info<Loc> {
+    fn default() -> Self {
+        Self {
+            locals: HashSet::default(),
+            assignment: HashMap::default(),
+        }
+    }
 }
 
 pub trait Check: Sized {

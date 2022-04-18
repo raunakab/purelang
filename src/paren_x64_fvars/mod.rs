@@ -88,3 +88,5 @@ impl From<ParenX64Fvars> for target::ParenX64 {
         Self { p }
     }
 }
+
+pass!(implement_fvars, self::ParenX64Fvars, target::ParenX64);

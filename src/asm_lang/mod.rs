@@ -118,8 +118,11 @@ impl AsmLang {
                     info: cpsc411::Info { locals, .. },
                     tail,
                 } => {
-                    let assignment = locals
-                        .iter()
+                    let mut locals_as_vec = locals.iter().collect::<Vec<_>>();
+                    locals_as_vec.sort();
+
+                    let assignment = locals_as_vec
+                        .into_iter()
                         .map(|aloc| {
                             let aloc = aloc.clone();
                             let fvar = cpsc411::Fvar::fresh();
@@ -251,3 +254,5 @@ impl From<AsmLang> for target::NestedAsmLang {
         asm_lang.uncover_locals().assign_fvars().replace_locations()
     }
 }
+
+pass!(assign_homes, self::AsmLang, target::NestedAsmLang);
