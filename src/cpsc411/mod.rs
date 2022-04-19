@@ -19,7 +19,13 @@ fn fresh_index(asbtract_index: &Arc<Mutex<usize>>) -> usize {
     index
 }
 
-#[derive(Derivative, Clone, Hash, PartialEq, Eq)]
+#[cfg(test)]
+fn set_index(asbtract_index: &Arc<Mutex<usize>>) {
+    let mut abstract_index = asbtract_index.lock().unwrap();
+    *abstract_index = 0usize;
+}
+
+#[derive(Debug, Derivative, Clone, Hash, PartialEq, Eq)]
 #[derivative(PartialOrd, Ord)]
 pub struct Aloc {
     #[derivative(PartialOrd = "ignore", Ord = "ignore")]
@@ -49,6 +55,11 @@ impl Aloc {
             name: name.into(),
             index,
         }
+    }
+
+    #[cfg(test)]
+    pub fn reset_index() {
+        set_index(&ALOC_INDEX);
     }
 }
 
@@ -82,13 +93,13 @@ impl Reg {
     }
 }
 
-#[derive(Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 pub enum Binop {
     plus,
     multiply,
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Fvar {
     pub index: usize,
 }
@@ -98,8 +109,14 @@ impl Fvar {
         let index = fresh_index(&FVAR_INDEX);
         Self { index }
     }
+
+    #[cfg(test)]
+    pub fn reset_index() {
+        set_index(&FVAR_INDEX)
+    }
 }
 
+#[derive(Debug, PartialEq, Eq)]
 pub struct Info<Loc> {
     pub locals: HashSet<Aloc>,
     pub assignment: HashMap<Aloc, Loc>,

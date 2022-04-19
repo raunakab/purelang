@@ -29,7 +29,7 @@ pub enum Effect {
     },
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Loc {
     reg { reg: cpsc411::Reg },
     fvar { fvar: cpsc411::Fvar },

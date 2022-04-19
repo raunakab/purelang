@@ -9,6 +9,7 @@ pub use self::data::*;
 use crate::cpsc411;
 use crate::nested_asm_lang as target;
 
+#[derive(Debug, PartialEq, Eq)]
 pub struct AsmLang {
     pub p: self::P,
 }
@@ -103,40 +104,46 @@ impl AsmLang {
         Self { p }
     }
 
-    // /// AssignFvars: Self/Locals -> Self/Assignments
-    // ///
-    // /// ### Purpose:
-    // /// Compiles Asm-lang v2/locals to Asm-lang v2/assignments, by assigning
-    // /// each abstract location from the locals info field to a fresh frame
-    // /// variable.
-    // fn assign_fvars(self) -> Self {
-    //     let Self { p } = self;
-    //     fn assign_p(p: self::P) -> self::P {
-    //         match p {
-    //             self::P::module {
-    //                 info: cpsc411::Info { locals, .. },
-    //                 tail,
-    //             } => {
-    //                 let mut locals_as_vec =
-    // locals.iter().collect::<Vec<_>>();
-    // locals_as_vec.sort();                 let assignment = locals_as_vec
-    //                     .into_iter()
-    //                     .map(|aloc| {
-    //                         let aloc = aloc.clone();
-    //                         let fvar = cpsc411::Fvar::fresh();
-    //                         let loc = target::Loc::fvar { fvar };
-    //                         (aloc, loc)
-    //                     })
-    //                     .collect::<HashMap<cpsc411::Aloc, target::Loc>>();
-    //                 let info = cpsc411::Info { locals, assignment };
-    //                 self::P::module { info, tail }
-    //             },
-    //         }
-    //     }
-    //     let p = assign_p(p);
-    //     Self { p }
-    // }
+    /// AssignFvars: Self/Locals -> Self/Assignments
+    ///
+    /// ### Purpose:
+    /// Compiles Asm-lang v2/locals to Asm-lang v2/assignments, by assigning
+    /// each abstract location from the locals info field to a fresh frame
+    /// variable.
+    fn assign_fvars(self) -> Self {
+        let Self { p } = self;
 
+        fn assign_p(p: self::P) -> self::P {
+            match p {
+                self::P::module {
+                    info: cpsc411::Info { locals, .. },
+                    tail,
+                } => {
+                    let mut locals_as_vec = locals.iter().collect::<Vec<_>>();
+                    locals_as_vec.sort();
+
+                    let assignment = locals_as_vec
+                        .into_iter()
+                        .map(|aloc| {
+                            let aloc = aloc.clone();
+                            let fvar = cpsc411::Fvar::fresh();
+                            let loc = target::Loc::fvar { fvar };
+                            (aloc, loc)
+                        })
+                        .collect::<HashMap<cpsc411::Aloc, target::Loc>>();
+
+                    let info = cpsc411::Info { locals, assignment };
+
+                    self::P::module { info, tail }
+                },
+            }
+        }
+
+        let p = assign_p(p);
+        Self { p }
+    }
+
+    #[allow(unused)]
     /// UndeadAnalysis: Self/Locals -> Self/Undead
     ///
     /// ### Purpose:
@@ -146,6 +153,7 @@ impl AsmLang {
         todo!()
     }
 
+    #[allow(unused)]
     /// ConfictAnalysis: Self/Undead -> Self/Conflicts
     ///
     /// ### Purpose:
@@ -154,6 +162,7 @@ impl AsmLang {
         todo!()
     }
 
+    #[allow(unused)]
     /// AssignRegisters: Self/Conflicts -> Self/Assignments
     ///
     /// ### Purpose:
@@ -273,12 +282,7 @@ impl AsmLang {
 /// with a physical location.
 impl From<AsmLang> for target::NestedAsmLang {
     fn from(asm_lang: AsmLang) -> Self {
-        asm_lang
-            .uncover_locals()
-            .undead_analysis()
-            .conflict_analysis()
-            .assign_registers()
-            .replace_locations()
+        asm_lang.uncover_locals().assign_fvars().replace_locations()
     }
 }
 
