@@ -24,6 +24,7 @@ pub enum Value {
         triv: Triv,
     },
     binop_triv_triv {
+        binop: cpsc411::Binop,
         triv1: Triv,
         triv2: Triv,
     },

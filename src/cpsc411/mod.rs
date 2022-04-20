@@ -29,8 +29,8 @@ fn set_index(asbtract_index: &Arc<Mutex<usize>>) {
 
 #[cfg(test)]
 pub fn reset_all_indices() {
-    Aloc::reset_index();
-    Fvar::reset_index();
+    set_index(&ALOC_INDEX);
+    set_index(&FVAR_INDEX);
 }
 
 #[derive(Debug, Derivative, Clone, Hash, PartialEq, Eq)]
@@ -63,11 +63,6 @@ impl Aloc {
             name: name.into(),
             index,
         }
-    }
-
-    #[cfg(test)]
-    pub fn reset_index() {
-        set_index(&ALOC_INDEX);
     }
 }
 
@@ -116,11 +111,6 @@ impl Fvar {
     pub fn fresh() -> Self {
         let index = fresh_index(&FVAR_INDEX);
         Self { index }
-    }
-
-    #[cfg(test)]
-    pub fn reset_index() {
-        set_index(&FVAR_INDEX)
     }
 }
 

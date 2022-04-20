@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use crate::cpsc411;
+
 #[derive(Debug, PartialEq, Eq)]
 pub enum P {
     module { tail: Tail },
@@ -22,6 +24,7 @@ pub enum Value {
         triv: Triv,
     },
     binop_triv_triv {
+        binop: cpsc411::Binop,
         triv1: Triv,
         triv2: Triv,
     },
@@ -37,4 +40,4 @@ pub enum Triv {
     name { name: Name },
 }
 
-type Name = String;
+pub type Name = String;

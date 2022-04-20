@@ -5,6 +5,7 @@ mod tests;
 pub use self::data::*;
 use crate::imp_mf_lang as target;
 
+#[derive(Debug, PartialEq, Eq)]
 pub struct ValuesUniqueLang {
     pub p: self::P,
 }

@@ -42,7 +42,7 @@ fn book_example_1() {
         },
     };
 
-    cpsc411::Aloc::reset_index();
+    cpsc411::reset_all_indices();
 
     let actual = program.select_instructions();
 
