@@ -10,14 +10,16 @@ pub struct ParenX64Fvars {
     pub p: self::P,
 }
 
-/// ImplementFvars: ParenX64Fvars -> ParenX64
-///
-/// ### Purpose:
-/// Compiles the Paren-x64-fvars v2 to Paren-x64 v2 by reifying fvars
-/// into displacement mode operands. The pass should use
-/// current-frame-base-pointer-register.
-impl From<ParenX64Fvars> for target::ParenX64 {
-    fn from(ParenX64Fvars { p }: ParenX64Fvars) -> Self {
+impl ParenX64Fvars {
+    /// ImplementFvars: ParenX64Fvars -> ParenX64
+    ///
+    /// ### Purpose:
+    /// Compiles the Paren-x64-fvars v2 to Paren-x64 v2 by reifying fvars
+    /// into displacement mode operands. The pass should use
+    /// current-frame-base-pointer-register.
+    pub fn implement_fvars(self) -> target::ParenX64 {
+        let Self { p } = self;
+
         fn implement_p(p: self::P) -> target::P {
             match p {
                 self::P::begin { ss } => {
@@ -85,8 +87,6 @@ impl From<ParenX64Fvars> for target::ParenX64 {
         }
 
         let p = implement_p(p);
-        Self { p }
+        target::ParenX64 { p }
     }
 }
-
-pass!(implement_fvars, self::ParenX64Fvars, target::ParenX64);

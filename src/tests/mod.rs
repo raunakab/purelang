@@ -1,18 +1,23 @@
+use serial_test::serial;
+
 use crate::asm_lang as source;
 use crate::cpsc411;
+use crate::cpsc411::Compile;
+use crate::cpsc411::Interpret;
 
 #[test]
+#[serial]
 fn basic() {
-    let program = source::AsmLang {
+    let ir = source::AsmLang {
         p: source::P::module {
             info: cpsc411::Info::default(),
             tail: source::Tail::halt {
                 triv: source::Triv::int64 { int64: 0 },
             },
         },
-    };
+    }
+    .compile(crate::OptLevels::O1);
 
-    let ir = crate::purelang_c(program);
     let x64 = ir.clone().generate_x64();
     let result = ir.interpret();
 
@@ -23,12 +28,15 @@ mov rax, 0"
             .to_string(),
     );
 
-    assert_eq!(result, 0,);
+    assert_eq!(result, 0);
+
+    cpsc411::reset_all_indices();
 }
 
 #[test]
+#[serial]
 fn one_basic_effect() {
-    let program = source::AsmLang {
+    let ir = source::AsmLang {
         p: source::P::module {
             info: cpsc411::Info::default(),
             tail: source::Tail::begin {
@@ -41,9 +49,9 @@ fn one_basic_effect() {
                 }),
             },
         },
-    };
+    }
+    .compile(crate::OptLevels::O1);
 
-    let ir = crate::purelang_c(program);
     let x64 = ir.clone().generate_x64();
     let result = ir.interpret();
 
@@ -55,12 +63,15 @@ mov rax, 2005"
             .to_string()
     );
 
-    assert_eq!(result, 2005,);
+    assert_eq!(result, 2005);
+
+    cpsc411::reset_all_indices();
 }
 
 #[test]
+#[serial]
 fn multiple_basic_effects() {
-    let program = source::AsmLang {
+    let ir = source::AsmLang {
         p: source::P::module {
             info: cpsc411::Info::default(),
             tail: source::Tail::begin {
@@ -79,9 +90,9 @@ fn multiple_basic_effects() {
                 }),
             },
         },
-    };
+    }
+    .compile(crate::OptLevels::O1);
 
-    let ir = crate::purelang_c(program);
     let x64 = ir.clone().generate_x64();
     let result = ir.interpret();
 
@@ -94,15 +105,18 @@ mov rax, 1973"
             .to_string()
     );
 
-    assert_eq!(result, 1973,);
+    assert_eq!(result, 1973);
+
+    cpsc411::reset_all_indices();
 }
 
 #[test]
+#[serial]
 fn one_complex_effect() {
     let aloc_1 = cpsc411::Aloc::fresh();
     let aloc_2 = cpsc411::Aloc::fresh();
 
-    let program = source::AsmLang {
+    let ir = source::AsmLang {
         p: source::P::module {
             info: cpsc411::Info::default(),
             tail: source::Tail::begin {
@@ -125,9 +139,9 @@ fn one_complex_effect() {
                 }),
             },
         },
-    };
+    }
+    .compile(crate::OptLevels::O1);
 
-    let ir = crate::purelang_c(program);
     let x64 = ir.clone().generate_x64();
     let result = ir.interpret();
 
@@ -142,14 +156,17 @@ mov rax, QWORD [rbp - 0]"
     );
 
     assert_eq!(result, 1220);
+
+    cpsc411::reset_all_indices();
 }
 
 #[test]
+#[serial]
 fn one_complex_effect_with_addition() {
     let aloc_1 = cpsc411::Aloc::fresh();
     let aloc_2 = cpsc411::Aloc::fresh();
 
-    let program = source::AsmLang {
+    let ir = source::AsmLang {
         p: source::P::module {
             info: cpsc411::Info::default(),
             tail: source::Tail::begin {
@@ -177,9 +194,9 @@ fn one_complex_effect_with_addition() {
                 }),
             },
         },
-    };
+    }
+    .compile(crate::OptLevels::O1);
 
-    let ir = crate::purelang_c(program);
     let x64 = ir.clone().generate_x64();
     let result = ir.interpret();
 
@@ -197,4 +214,6 @@ mov rax, QWORD [rbp - 8]"
     );
 
     assert_eq!(result, 30);
+
+    cpsc411::reset_all_indices();
 }

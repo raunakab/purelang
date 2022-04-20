@@ -12,13 +12,15 @@ pub struct ValuesLang {
     pub p: self::P,
 }
 
-/// Uniquify: ValuesLang -> ValuesUniqueLang
-///
-/// ### Purpose:
-/// Compiles Values-lang v3 to Values-unique-lang v3 by resolving all lexical
-/// identifiers to abstract locations.
-impl From<ValuesLang> for target::ValuesUniqueLang {
-    fn from(ValuesLang { p }: ValuesLang) -> Self {
+impl ValuesLang {
+    /// Uniquify: ValuesLang -> ValuesUniqueLang
+    ///
+    /// ### Purpose:
+    /// Compiles Values-lang v3 to Values-unique-lang v3 by resolving all
+    /// lexical identifiers to abstract locations.
+    pub fn uniquify(self) -> target::ValuesUniqueLang {
+        let Self { p } = self;
+
         fn uniquify_p(p: self::P) -> target::P {
             match p {
                 self::P::module { tail } => {
@@ -95,8 +97,6 @@ impl From<ValuesLang> for target::ValuesUniqueLang {
         }
 
         let p = uniquify_p(p);
-        Self { p }
+        target::ValuesUniqueLang { p }
     }
 }
-
-pass!(uniquify, self::ValuesLang, target::ValuesUniqueLang);

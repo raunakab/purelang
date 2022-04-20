@@ -1,8 +1,11 @@
+use serial_test::serial;
+
 use crate::asm_lang as target;
 use crate::cpsc411;
 use crate::imp_cmf_lang as source;
 
 #[test]
+#[serial]
 fn book_example_1() {
     let program = source::ImpCmfLang {
         p: source::P::module {
@@ -44,9 +47,12 @@ fn book_example_1() {
     let actual = program.select_instructions();
 
     assert_eq!(actual, expected);
+
+    cpsc411::reset_all_indices();
 }
 
 #[test]
+#[serial]
 fn book_example_2() {
     let aloc = cpsc411::Aloc::fresh_with_name("x");
     let program = source::ImpCmfLang {
@@ -85,9 +91,12 @@ fn book_example_2() {
     let actual = program.select_instructions();
 
     assert_eq!(actual, expected);
+
+    cpsc411::reset_all_indices();
 }
 
 #[test]
+#[serial]
 fn book_example_3() {
     let aloc = cpsc411::Aloc::fresh_with_name("x");
     let program = source::ImpCmfLang {
@@ -135,9 +144,12 @@ fn book_example_3() {
     let actual = program.select_instructions();
 
     assert_eq!(actual, expected);
+
+    cpsc411::reset_all_indices();
 }
 
 #[test]
+#[serial]
 fn book_example_4() {
     let aloc1 = cpsc411::Aloc::fresh_with_name("x");
     let aloc2 = cpsc411::Aloc::fresh_with_name("x");
@@ -216,4 +228,6 @@ fn book_example_4() {
     let actual = program.select_instructions();
 
     assert_eq!(actual, expected);
+
+    cpsc411::reset_all_indices();
 }

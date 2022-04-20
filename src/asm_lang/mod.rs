@@ -7,6 +7,7 @@ use std::collections::HashSet;
 
 pub use self::data::*;
 use crate::cpsc411;
+use crate::cpsc411::Compile;
 use crate::nested_asm_lang as target;
 
 #[derive(Debug, PartialEq, Eq)]
@@ -143,7 +144,6 @@ impl AsmLang {
         Self { p }
     }
 
-    #[allow(unused)]
     /// UndeadAnalysis: Self/Locals -> Self/Undead
     ///
     /// ### Purpose:
@@ -153,7 +153,6 @@ impl AsmLang {
         todo!()
     }
 
-    #[allow(unused)]
     /// ConfictAnalysis: Self/Undead -> Self/Conflicts
     ///
     /// ### Purpose:
@@ -162,7 +161,6 @@ impl AsmLang {
         todo!()
     }
 
-    #[allow(unused)]
     /// AssignRegisters: Self/Conflicts -> Self/Assignments
     ///
     /// ### Purpose:
@@ -273,17 +271,52 @@ impl AsmLang {
         let p = replace_p(p);
         target::NestedAsmLang { p }
     }
-}
 
-/// AssignHomes: AsmLang -> NestedAsmLang
-///
-/// ### Purpose:
-/// Compiles Asm-lang v2 to Nested-asm-lang v2, replacing each abstract location
-/// with a physical location.
-impl From<AsmLang> for target::NestedAsmLang {
-    fn from(asm_lang: AsmLang) -> Self {
-        asm_lang.uncover_locals().assign_fvars().replace_locations()
+    /// AssignHomes: AsmLang -> NestedAsmLang
+    ///
+    /// ### Purpose:
+    /// Compiles Asm-lang v2 to Nested-asm-lang v2, replacing each abstract
+    /// location with a physical location.
+    pub fn assign_homes(self) -> target::NestedAsmLang {
+        self.uncover_locals().assign_fvars().replace_locations()
+    }
+
+    /// AssignHomesOpt: AsmLang -> NestedAsmLang
+    ///
+    /// ### Purpose:
+    /// Compiles Asm-lang v2 to Nested-asm-lang v2, replacing each abstract
+    /// location with a physical location. This version performs graph-colouring
+    /// register allocation.
+    pub fn assign_homes_opt(self) -> target::NestedAsmLang {
+        self.uncover_locals()
+            .undead_analysis()
+            .conflict_analysis()
+            .assign_registers()
+            .replace_locations()
     }
 }
 
-pass!(assign_homes_opt, self::AsmLang, target::NestedAsmLang);
+/// Compile: AsmLang -> ParenX64
+///
+/// ### Purpose:
+/// Compiles the AsmLang program into a ParenX64 program.
+impl Compile for AsmLang {
+    fn compile(
+        self,
+        opt_level: crate::OptLevels,
+    ) -> crate::paren_x64::ParenX64 {
+        match opt_level {
+            crate::OptLevels::O1 => self
+                .assign_homes()
+                .flatten_begins()
+                .patch_instructions()
+                .implement_fvars(),
+
+            crate::OptLevels::O2 | crate::OptLevels::O3 => self
+                .assign_homes_opt()
+                .flatten_begins()
+                .patch_instructions()
+                .implement_fvars(),
+        }
+    }
+}

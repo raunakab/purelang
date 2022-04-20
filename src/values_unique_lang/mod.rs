@@ -18,17 +18,13 @@ impl ValuesUniqueLang {
     pub fn optimize_let_bindings(self) -> Self {
         self
     }
-}
 
-/// SequentializeLet: ValuesUniqueLang -> ImpMfLang
-///
-/// ### Purpose:
-/// Compiles Values-unique-lang v3 to Imp-mf-lang v3 by picking a particular
-/// order to implement let expressions using set!.
-impl From<ValuesUniqueLang> for target::ImpMfLang {
-    fn from(ValuesUniqueLang { p }: ValuesUniqueLang) -> Self {
+    /// SequentializeLet: ValuesUniqueLang -> ImpMfLang
+    ///
+    /// ### Purpose:
+    /// Compiles Values-unique-lang v3 to Imp-mf-lang v3 by picking a particular
+    /// order to implement let expressions using set!.
+    pub fn sequentialize_let(self) -> target::ImpMfLang {
         todo!()
     }
 }
-
-pass!(sequentialize_let, self::ValuesUniqueLang, target::ImpMfLang);

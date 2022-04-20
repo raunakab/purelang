@@ -121,8 +121,87 @@ impl ParenX64 {
         check_init_p(&self.p, &mut initialized_registers)?;
         Ok(self)
     }
+
+    /// GenerateX64: ParenX64 -> String
+    ///
+    /// ### Purpose:
+    /// Generate X64 source code in string form.
+    pub fn generate_x64(self) -> String {
+        let Self { p } = self;
+
+        fn generate_binop(binop: &cpsc411::Binop) -> String {
+            match binop {
+                cpsc411::Binop::plus => format!("add"),
+                cpsc411::Binop::multiply => format!("imul"),
+            }
+        }
+
+        fn generate_addr(Addr { fbp, disp_offset }: &self::Addr) -> String {
+            format!("QWORD [{:?} - {}]", fbp, disp_offset)
+        }
+
+        fn generate_loc(loc: &self::Loc) -> String {
+            match loc {
+                self::Loc::addr { addr } => generate_addr(addr),
+                self::Loc::reg { reg } => format!("{:?}", reg),
+            }
+        }
+
+        fn generate_triv(triv: &self::Triv) -> String {
+            match triv {
+                self::Triv::reg { reg } => format!("{:?}", reg),
+                self::Triv::int64 { int64 } => format!("{}", int64),
+            }
+        }
+
+        fn generate_s(s: &self::S) -> String {
+            match s {
+                self::S::set_addr_int32 { addr, int32 } => {
+                    let addr_as_string = generate_addr(addr);
+                    format!("mov {}, {}", addr_as_string, int32)
+                },
+                self::S::set_addr_reg { addr, reg } => {
+                    let addr_as_string = generate_addr(addr);
+                    format!("mov {}, {:?}", addr_as_string, reg)
+                },
+                self::S::set_reg_loc { reg, loc } => {
+                    let loc_as_string = generate_loc(loc);
+                    format!("mov {:?}, {}", reg, loc_as_string)
+                },
+                self::S::set_reg_triv { reg, triv } => {
+                    let triv_as_string = generate_triv(triv);
+                    format!("mov {:?}, {}", reg, triv_as_string)
+                },
+                self::S::set_reg_binop_reg_int32 { reg, binop, int32 } => {
+                    let binop_as_string = generate_binop(binop);
+                    format!("{} {:?}, {:?}", binop_as_string, reg, int32)
+                },
+                self::S::set_reg_binop_reg_loc { reg, binop, loc } => {
+                    let binop_as_string = generate_binop(binop);
+                    let loc_as_string = generate_loc(loc);
+                    format!("{} {:?}, {}", binop_as_string, reg, loc_as_string)
+                },
+            }
+        }
+
+        fn generate_p(p: &self::P) -> String {
+            match p {
+                self::P::begin { ref ss } => {
+                    ss.iter().fold(String::new(), |acc, s| {
+                        let s_as_string = generate_s(s);
+                        format!("{}\n{}", acc, s_as_string)
+                    })
+                },
+            }
+        }
+
+        generate_p(&p)
+    }
 }
 
+/// Check: ParenX64 -> Result<(), String>
+///
+/// ### Purpose:
 /// Check ParenX64 to make sure it's a valid ParenX64 program.
 /// - Need to assert registers are initialized before using.
 impl cpsc411::Check for ParenX64 {
@@ -131,6 +210,9 @@ impl cpsc411::Check for ParenX64 {
     }
 }
 
+/// Interpret: ParenX64 -> i64
+///
+/// ### Purpose:
 /// Interpret ParenX64 source code into an i64.
 impl cpsc411::Interpret for ParenX64 {
     type Output = i64;
@@ -234,91 +316,3 @@ impl cpsc411::Interpret for ParenX64 {
         interpret_p(p, &mut registers, &mut addrs)
     }
 }
-
-/// Interpret ParenX64 source code into an i64.
-/// Implemented due to being required by the `pass` macro expansion.
-impl From<ParenX64> for <ParenX64 as cpsc411::Interpret>::Output {
-    fn from(paren_x64: ParenX64) -> Self {
-        paren_x64.interpret()
-    }
-}
-
-/// Generate X64 source code in string form.
-impl From<ParenX64> for String {
-    fn from(ParenX64 { p }: ParenX64) -> Self {
-        fn generate_binop(binop: &cpsc411::Binop) -> String {
-            match binop {
-                cpsc411::Binop::plus => format!("add"),
-                cpsc411::Binop::multiply => format!("imul"),
-            }
-        }
-
-        fn generate_addr(Addr { fbp, disp_offset }: &self::Addr) -> String {
-            format!("QWORD [{:?} - {}]", fbp, disp_offset)
-        }
-
-        fn generate_loc(loc: &self::Loc) -> String {
-            match loc {
-                self::Loc::addr { addr } => generate_addr(addr),
-                self::Loc::reg { reg } => format!("{:?}", reg),
-            }
-        }
-
-        fn generate_triv(triv: &self::Triv) -> String {
-            match triv {
-                self::Triv::reg { reg } => format!("{:?}", reg),
-                self::Triv::int64 { int64 } => format!("{}", int64),
-            }
-        }
-
-        fn generate_s(s: &self::S) -> String {
-            match s {
-                self::S::set_addr_int32 { addr, int32 } => {
-                    let addr_as_string = generate_addr(addr);
-                    format!("mov {}, {}", addr_as_string, int32)
-                },
-                self::S::set_addr_reg { addr, reg } => {
-                    let addr_as_string = generate_addr(addr);
-                    format!("mov {}, {:?}", addr_as_string, reg)
-                },
-                self::S::set_reg_loc { reg, loc } => {
-                    let loc_as_string = generate_loc(loc);
-                    format!("mov {:?}, {}", reg, loc_as_string)
-                },
-                self::S::set_reg_triv { reg, triv } => {
-                    let triv_as_string = generate_triv(triv);
-                    format!("mov {:?}, {}", reg, triv_as_string)
-                },
-                self::S::set_reg_binop_reg_int32 { reg, binop, int32 } => {
-                    let binop_as_string = generate_binop(binop);
-                    format!("{} {:?}, {:?}", binop_as_string, reg, int32)
-                },
-                self::S::set_reg_binop_reg_loc { reg, binop, loc } => {
-                    let binop_as_string = generate_binop(binop);
-                    let loc_as_string = generate_loc(loc);
-                    format!("{} {:?}, {}", binop_as_string, reg, loc_as_string)
-                },
-            }
-        }
-
-        fn generate_p(p: &self::P) -> String {
-            match p {
-                self::P::begin { ref ss } => {
-                    ss.iter().fold(String::new(), |acc, s| {
-                        let s_as_string = generate_s(s);
-                        format!("{}\n{}", acc, s_as_string)
-                    })
-                },
-            }
-        }
-
-        generate_p(&p)
-    }
-}
-
-pass!(generate_x64, self::ParenX64, String);
-pass!(
-    interpret,
-    self::ParenX64,
-    <ParenX64 as cpsc411::Interpret>::Output
-);

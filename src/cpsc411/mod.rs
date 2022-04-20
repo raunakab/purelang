@@ -6,6 +6,8 @@ use std::sync::Mutex;
 use derivative::*;
 use lazy_static::lazy_static;
 
+use crate::paren_x64;
+
 lazy_static! {
     static ref FVAR_INDEX: Arc<Mutex<usize>> = Arc::new(Mutex::new(0));
     static ref ALOC_INDEX: Arc<Mutex<usize>> = Arc::new(Mutex::new(0));
@@ -23,6 +25,12 @@ fn fresh_index(asbtract_index: &Arc<Mutex<usize>>) -> usize {
 fn set_index(asbtract_index: &Arc<Mutex<usize>>) {
     let mut abstract_index = asbtract_index.lock().unwrap();
     *abstract_index = 0usize;
+}
+
+#[cfg(test)]
+pub fn reset_all_indices() {
+    Aloc::reset_index();
+    Fvar::reset_index();
 }
 
 #[derive(Debug, Derivative, Clone, Hash, PartialEq, Eq)]
@@ -139,4 +147,8 @@ pub trait Interpret {
     type Output;
 
     fn interpret(self) -> Self::Output;
+}
+
+pub trait Compile {
+    fn compile(self, opt_level: crate::OptLevels) -> paren_x64::ParenX64;
 }

@@ -10,14 +10,16 @@ pub struct ImpCmfLang {
     pub p: self::P,
 }
 
-/// SelectInstructions: ImpCmfLang -> AsmLang
-///
-/// ### Purpose:
-/// Compiles Imp-cmf-lang v3 to Asm-lang v2, selecting appropriate sequences of
-/// abstract assembly instructions to implement the operations of the source
-/// language.
-impl From<ImpCmfLang> for target::AsmLang {
-    fn from(ImpCmfLang { p }: ImpCmfLang) -> Self {
+impl ImpCmfLang {
+    /// SelectInstructions: ImpCmfLang -> AsmLang
+    ///
+    /// ### Purpose:
+    /// Compiles Imp-cmf-lang v3 to Asm-lang v2, selecting appropriate sequences
+    /// of abstract assembly instructions to implement the operations of the
+    /// source language.
+    pub fn select_instructions(self) -> target::AsmLang {
+        let Self { p } = self;
+
         fn select_p(p: self::P) -> target::P {
             match p {
                 self::P::module { tail } => {
@@ -130,7 +132,6 @@ impl From<ImpCmfLang> for target::AsmLang {
                     triv2,
                 } => {
                     let aloc = cpsc411::Aloc::fresh();
-                    println!("aloc: {:?}", aloc);
 
                     let triv1 = select_triv(triv1);
                     let triv2 = select_triv(triv2);
@@ -164,8 +165,6 @@ impl From<ImpCmfLang> for target::AsmLang {
         }
 
         let p = select_p(p);
-        Self { p }
+        target::AsmLang { p }
     }
 }
-
-pass!(select_instructions, self::ImpCmfLang, target::AsmLang);
