@@ -6,6 +6,7 @@ pub use self::data::*;
 use crate::asm_lang as target;
 use crate::cpsc411;
 
+#[derive(Debug, PartialEq, Eq)]
 pub struct ImpCmfLang {
     pub p: self::P,
 }
