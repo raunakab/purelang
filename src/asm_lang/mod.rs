@@ -684,17 +684,13 @@ impl Compile for AsmLang {
         opt_level: crate::OptLevels,
     ) -> crate::paren_x64::ParenX64 {
         match opt_level {
-            crate::OptLevels::O1 => self
-                .assign_homes()
-                .flatten_begins()
-                .patch_instructions()
-                .implement_fvars(),
-
-            crate::OptLevels::O2 | crate::OptLevels::O3 => self
-                .assign_homes_opt()
-                .flatten_begins()
-                .patch_instructions()
-                .implement_fvars(),
+            crate::OptLevels::O1 => self.assign_homes(),
+            crate::OptLevels::O2 | crate::OptLevels::O3 => {
+                self.assign_homes_opt()
+            },
         }
+        .flatten_begins()
+        .patch_instructions()
+        .implement_fvars()
     }
 }

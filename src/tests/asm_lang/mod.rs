@@ -217,3 +217,67 @@ mov rax, QWORD [rbp - 8]"
 
     cpsc411::reset_all_indices();
 }
+
+#[test]
+#[serial]
+fn basic_opt() {
+    let ir = source::AsmLang {
+        p: source::P::module {
+            info: cpsc411::Info::default(),
+            tail: source::Tail::halt {
+                triv: source::Triv::int64 { int64: 0 },
+            },
+        },
+    }
+    .compile(crate::OptLevels::O3);
+
+    let result = ir.interpret();
+
+    assert_eq!(result, 0);
+
+    cpsc411::reset_all_indices();
+}
+
+#[test]
+#[serial]
+fn one_complex_effect_with_addition_opt() {
+    let aloc_1 = cpsc411::Aloc::fresh();
+    let aloc_2 = cpsc411::Aloc::fresh();
+
+    let ir = source::AsmLang {
+        p: source::P::module {
+            info: cpsc411::Info::default(),
+            tail: source::Tail::begin {
+                effects: vec![
+                    source::Effect::set_aloc_triv {
+                        aloc: aloc_1.clone(),
+                        triv: source::Triv::int64 { int64: 10 },
+                    },
+                    source::Effect::set_aloc_triv {
+                        aloc: aloc_2.clone(),
+                        triv: source::Triv::int64 { int64: 20 },
+                    },
+                    source::Effect::set_aloc_binop_aloc_triv {
+                        aloc: aloc_2.clone(),
+                        binop: cpsc411::Binop::plus,
+                        triv: source::Triv::aloc {
+                            aloc: aloc_1.clone(),
+                        },
+                    },
+                ],
+                tail: Box::new(source::Tail::halt {
+                    triv: source::Triv::aloc {
+                        aloc: aloc_2.clone(),
+                    },
+                }),
+            },
+        },
+    }
+    .compile(crate::OptLevels::O2);
+
+    let result = ir.interpret();
+
+    assert_eq!(result, 30);
+
+    cpsc411::reset_all_indices();
+}
