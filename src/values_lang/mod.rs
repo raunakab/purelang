@@ -6,6 +6,7 @@ use std::collections::HashMap;
 
 pub use self::data::*;
 use crate::cpsc411;
+use crate::cpsc411::Compile;
 use crate::values_unique_lang as target;
 
 pub struct ValuesLang {
@@ -125,5 +126,18 @@ impl ValuesLang {
 
         let p = uniquify_p(p, &mut env);
         target::ValuesUniqueLang { p }
+    }
+}
+
+impl Compile for ValuesLang {
+    fn compile(
+        self,
+        opt_level: crate::OptLevels,
+    ) -> crate::paren_x64::ParenX64 {
+        self.uniquify()
+            .sequentialize_let()
+            .normalize_bind()
+            .select_instructions()
+            .compile(opt_level)
     }
 }
