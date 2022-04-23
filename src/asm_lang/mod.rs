@@ -516,7 +516,7 @@ impl AsmLang {
                     let aloc = lowest_order_aloc(&conflicts);
 
                     locals.remove(&aloc);
-                    conflicts.remove(&aloc);
+                    conflicts.remove_node(&aloc);
 
                     let mut assignments = recursive_assign(
                         locals,
@@ -532,7 +532,7 @@ impl AsmLang {
                         k,
                     )
                     .get(0)
-                    .map(|reg| target::Loc::reg { reg: reg.clone() })
+                    .map(|reg| target::Loc::reg { reg: *reg })
                     .unwrap_or(target::Loc::fvar {
                         fvar: cpsc411::Fvar::fresh(),
                     });

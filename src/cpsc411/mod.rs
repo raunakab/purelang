@@ -248,8 +248,13 @@ impl Graph {
         self.graph.insert(aloc, alocs);
     }
 
-    pub fn remove(&mut self, aloc: &Aloc) {
-        self.graph.remove(aloc);
+    pub fn remove_node(&mut self, aloc: &Aloc) {
+        let Self { graph } = self;
+
+        graph.remove(aloc);
+        graph.into_iter().for_each(|(_, alocs)| {
+            alocs.remove(aloc);
+        });
     }
 
     #[cfg(test)]
