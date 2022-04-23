@@ -8,3 +8,5 @@ edition = "2021"
 [dependencies]
 lazy_static = "1.4.0"
 derivative = "2.2.0"
+petgraph = "0.6.0"
+serial_test = "0.6.0"

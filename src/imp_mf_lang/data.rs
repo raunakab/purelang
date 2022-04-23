@@ -2,16 +2,13 @@ use crate::cpsc411;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum P {
-    module {
-        info: cpsc411::Info<super::target::Loc>,
-        tail: Tail,
-    },
+    module { tail: Tail },
 }
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Tail {
-    halt {
-        triv: Triv,
+    value {
+        value: Value,
     },
     begin {
         effects: Vec<Effect>,
@@ -21,17 +18,23 @@ pub enum Tail {
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Effect {
-    set_aloc_triv {
-        aloc: cpsc411::Aloc,
+    set_aloc_value { aloc: cpsc411::Aloc, value: Value },
+    begin { effects: Vec<Effect> },
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum Value {
+    triv {
         triv: Triv,
     },
-    set_aloc_binop_aloc_triv {
-        aloc: cpsc411::Aloc,
+    binop_triv_triv {
         binop: cpsc411::Binop,
-        triv: Triv,
+        triv1: Triv,
+        triv2: Triv,
     },
     begin {
         effects: Vec<Effect>,
+        value: Box<Value>,
     },
 }
 

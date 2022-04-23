@@ -1,4 +1,5 @@
 use crate::cpsc411::Binop;
+use crate::cpsc411::Interpret;
 use crate::cpsc411::Reg;
 use crate::paren_x64::data::Triv;
 use crate::paren_x64::data::P;

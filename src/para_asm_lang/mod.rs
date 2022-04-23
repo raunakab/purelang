@@ -10,16 +10,19 @@ pub struct ParaAsmLang {
     pub p: self::P,
 }
 
-/// PatchInstructions: ParaAsmLang -> ParenX64Fvars
-///
-/// ### Purpose:
-/// Compiles Para-asm-lang v2 to Paren-x64-fvars v2 by patching instructions
-/// that have no x64 analogue into a sequence of instructions. The
-/// implementation should use auxiliary registers from
-/// current-patch-instructions-registers when generating instruction sequences,
-/// and current-return-value-register for compiling halt.
-impl From<ParaAsmLang> for target::ParenX64Fvars {
-    fn from(ParaAsmLang { p }: ParaAsmLang) -> Self {
+impl ParaAsmLang {
+    /// PatchInstructions: ParaAsmLang -> ParenX64Fvars
+    ///
+    /// ### Purpose:
+    /// Compiles Para-asm-lang v2 to Paren-x64-fvars v2 by patching instructions
+    /// that have no x64 analogue into a sequence of instructions. The
+    /// implementation should use auxiliary registers from
+    /// current-patch-instructions-registers when generating instruction
+    /// sequences, and current-return-value-register for compiling halt.
+    // impl From<ParaAsmLang> for target::ParenX64Fvars {
+    pub fn patch_instructions(self) -> target::ParenX64Fvars {
+        let Self { p } = self;
+
         fn patch_p(p: self::P) -> target::P {
             match p {
                 self::P::begin { effects, halt } => {
@@ -315,8 +318,6 @@ impl From<ParaAsmLang> for target::ParenX64Fvars {
         }
 
         let p = patch_p(p);
-        Self { p }
+        target::ParenX64Fvars { p }
     }
 }
-
-pass!(patch_instructions, self::ParaAsmLang, target::ParenX64Fvars);
