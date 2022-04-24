@@ -8,13 +8,41 @@ pub enum P {
 }
 
 #[derive(Debug, PartialEq, Eq)]
+pub enum Pred {
+    relop_triv_triv {
+        relop: cpsc411::Relop,
+        triv1: Triv,
+        triv2: Triv,
+    },
+    r#true,
+    r#false,
+    not {
+        pred: Box<Self>,
+    },
+    r#let {
+        bindings: Bindings,
+        pred: Box<Self>,
+    },
+    r#if {
+        pred: Box<Self>,
+        csqt: Box<Self>,
+        antc: Box<Self>,
+    },
+}
+
+#[derive(Debug, PartialEq, Eq)]
 pub enum Tail {
     value {
         value: Value,
     },
     r#let {
         bindings: HashMap<Name, Value>,
-        tail: Box<Tail>,
+        tail: Box<Self>,
+    },
+    r#if {
+        pred: Pred,
+        csqt: Box<Self>,
+        antc: Box<Self>,
     },
 }
 
@@ -29,8 +57,13 @@ pub enum Value {
         triv2: Triv,
     },
     r#let {
-        bindings: HashMap<Name, Value>,
-        value: Box<Value>,
+        bindings: Bindings,
+        value: Box<Self>,
+    },
+    r#if {
+        pred: Pred,
+        csqt: Box<Self>,
+        antc: Box<Self>,
     },
 }
 
@@ -41,3 +74,5 @@ pub enum Triv {
 }
 
 pub type Name = String;
+
+pub type Bindings = HashMap<Name, Value>;

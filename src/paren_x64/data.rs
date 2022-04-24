@@ -1,7 +1,6 @@
 use std::hash::Hash;
 
-use crate::cpsc411::Binop;
-use crate::cpsc411::Reg;
+use crate::cpsc411;
 
 #[derive(Clone)]
 pub enum P {
@@ -10,28 +9,74 @@ pub enum P {
 
 #[derive(Clone)]
 pub enum S {
-    set_addr_int32 { addr: Addr, int32: i32 },
-    set_addr_reg { addr: Addr, reg: Reg },
-    set_reg_loc { reg: Reg, loc: Loc },
-    set_reg_triv { reg: Reg, triv: Triv },
-    set_reg_binop_reg_int32 { reg: Reg, binop: Binop, int32: i32 },
-    set_reg_binop_reg_loc { reg: Reg, binop: Binop, loc: Loc },
+    set_addr_int32 {
+        addr: Addr,
+        int32: i32,
+    },
+    set_addr_trg {
+        addr: Addr,
+        trg: Trg,
+    },
+    set_reg_loc {
+        reg: cpsc411::Reg,
+        loc: Loc,
+    },
+    set_reg_triv {
+        reg: cpsc411::Reg,
+        triv: Triv,
+    },
+    set_reg_binop_reg_int32 {
+        reg: cpsc411::Reg,
+        binop: cpsc411::Binop,
+        int32: i32,
+    },
+    set_reg_binop_reg_loc {
+        reg: cpsc411::Reg,
+        binop: cpsc411::Binop,
+        loc: Loc,
+    },
+    with_label {
+        label: cpsc411::Label,
+        s: Box<Self>,
+    },
+    jump_trg {
+        trg: Trg,
+    },
+    compare_reg_opand_jump_if {
+        reg: cpsc411::Reg,
+        opand: Opand,
+        relop: cpsc411::Relop,
+        label: cpsc411::Label,
+    },
+    nop,
 }
 
 #[derive(Clone)]
 pub enum Loc {
-    reg { reg: Reg },
+    reg { reg: cpsc411::Reg },
     addr { addr: Addr },
 }
 
-#[derive(Clone, Hash, PartialEq, Eq)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct Addr {
-    pub fbp: Reg,
+    pub fbp: cpsc411::Reg,
     pub disp_offset: usize,
 }
 
 #[derive(Clone)]
 pub enum Triv {
-    reg { reg: Reg },
+    trg { trg: Trg },
     int64 { int64: i64 },
+}
+
+#[derive(Clone)]
+pub enum Opand {
+    int64 { int64: i64 },
+    reg { reg: cpsc411::Reg },
+}
+
+#[derive(Debug, Clone)]
+pub enum Trg {
+    reg { reg: cpsc411::Reg },
+    label { label: cpsc411::Label },
 }

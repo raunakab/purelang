@@ -11,10 +11,12 @@ use crate::paren_x64;
 
 pub type AlocSet = HashSet<Aloc>;
 pub type Assignments<Loc> = HashMap<Aloc, Loc>;
+pub type PcAddr = usize;
 
 lazy_static! {
     static ref FVAR_INDEX: Arc<Mutex<usize>> = Arc::new(Mutex::new(0));
     static ref ALOC_INDEX: Arc<Mutex<usize>> = Arc::new(Mutex::new(0));
+    static ref LABEL_INDEX: Arc<Mutex<usize>> = Arc::new(Mutex::new(0));
     static ref CURRENT_ASSIGNABLE_REGISTERS: Arc<Mutex<HashSet<Reg>>> =
         Arc::new(Mutex::new(
             vec![
@@ -45,15 +47,16 @@ fn fresh_index(asbtract_index: &Arc<Mutex<usize>>) -> usize {
 }
 
 #[cfg(test)]
-fn set_index(asbtract_index: &Arc<Mutex<usize>>) {
+fn reset_index(asbtract_index: &Arc<Mutex<usize>>) {
     let mut abstract_index = asbtract_index.lock().unwrap();
     *abstract_index = 0usize;
 }
 
 #[cfg(test)]
 pub fn reset_all_indices() {
-    set_index(&ALOC_INDEX);
-    set_index(&FVAR_INDEX);
+    reset_index(&ALOC_INDEX);
+    reset_index(&FVAR_INDEX);
+    reset_index(&LABEL_INDEX);
 }
 
 #[derive(Derivative, Clone, Hash, PartialEq, Eq)]
@@ -116,6 +119,10 @@ pub enum Reg {
 }
 
 impl Reg {
+    pub fn current_return_reg() -> Self {
+        Self::rax
+    }
+
     pub fn current_frame_base_pointer() -> Self {
         Self::rbp
     }
@@ -138,6 +145,61 @@ impl Reg {
 pub enum Binop {
     plus,
     multiply,
+}
+
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum Relop {
+    gt,
+    gte,
+    lt,
+    lte,
+    eq,
+    neq,
+}
+
+impl std::ops::Not for Relop {
+    type Output = Self;
+
+    fn not(self) -> Self::Output {
+        match self {
+            Self::gt => Self::lte,
+            Self::gte => Self::lt,
+            Self::lt => Self::gte,
+            Self::lte => Self::gt,
+            Self::neq => Self::eq,
+            Self::eq => Self::neq,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
+pub struct Label {
+    pub label: String,
+}
+
+impl Label {
+    pub fn new() -> Self {
+        let index = fresh_index(&LABEL_INDEX);
+        let label = format!("L.tmp.{}", index);
+
+        Self { label }
+    }
+
+    pub fn new_with_name<I>(name: I) -> Self
+    where
+        String: From<I>,
+    {
+        let index = fresh_index(&LABEL_INDEX);
+        let name = String::from(name);
+        let label = format!("L.{}.{}", name, index);
+
+        Self { label }
+    }
+
+    pub fn halt_label() -> Self {
+        let label = format!("L.done");
+        Self { label }
+    }
 }
 
 #[derive(Debug, Hash, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]

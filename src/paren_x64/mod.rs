@@ -7,6 +7,7 @@ use std::collections::HashSet;
 
 pub use self::data::*;
 use crate::cpsc411;
+use crate::paren_x64_rt as target;
 
 #[derive(Clone)]
 pub struct ParenX64 {
@@ -14,111 +15,89 @@ pub struct ParenX64 {
 }
 
 impl ParenX64 {
-    fn check_init(self) -> Result<Self, String> {
-        let mut initialized_registers = HashSet::<cpsc411::Reg>::new();
+    /// CheckLabels: ParenX64 -> Result<ParenX64, String>
+    ///
+    /// ### Purpose:
+    /// Ensure all labels are unique and all jumps reference an existing label.
+    fn check_labels(self) -> Result<Self, String> {
+        type LabelStore = HashSet<cpsc411::Label>;
 
-        fn check_init_reg(
-            reg: &cpsc411::Reg,
-            initialized_registers: &HashSet<cpsc411::Reg>,
-        ) -> Result<(), String> {
-            let reg_is_initialized = initialized_registers.contains(reg);
-            match reg_is_initialized {
-                true => Ok(()),
-                false => Err(format!("{:?} is not initialized", reg)),
-            }
-        }
+        let Self { p } = &self;
 
-        fn check_init_triv(
-            triv: &self::Triv,
-            initialized_registers: &HashSet<cpsc411::Reg>,
-        ) -> Result<(), String> {
-            match triv {
-                self::Triv::int64 { .. } => Ok(()),
-                self::Triv::reg { reg } => {
-                    check_init_reg(reg, initialized_registers)
+        fn check_p(p: &self::P) -> Result<(), String> {
+            let mut labels = LabelStore::default();
+
+            match p {
+                self::P::begin { ss } => {
+                    ss.iter()
+                        .try_for_each(|s| collect_labels(s, &mut labels))?;
+                    ss.iter().try_for_each(|s| check_jumps(s, &labels))?;
+
+                    Ok(())
                 },
             }
         }
 
-        fn check_init_loc(
-            loc: &self::Loc,
-            initialized_registers: &HashSet<cpsc411::Reg>,
-        ) -> Result<(), String> {
-            match loc {
-                self::Loc::addr { .. } => Ok(()),
-                self::Loc::reg { reg } => {
-                    check_init_reg(reg, initialized_registers)
-                },
-            }
-        }
-
-        fn check_init_s(
+        fn collect_labels(
             s: &self::S,
-            initialized_registers: &mut HashSet<cpsc411::Reg>,
+            labels: &mut LabelStore,
         ) -> Result<(), String> {
             match s {
-                self::S::set_addr_int32 { .. } => Ok(()),
-                self::S::set_addr_reg { .. } => Ok(()),
-                self::S::set_reg_loc { reg, loc } => {
-                    check_init_loc(loc, initialized_registers)?;
-                    initialized_registers.insert(*reg);
-                    Ok(())
-                },
-                self::S::set_reg_triv { reg, triv } => {
-                    check_init_triv(triv, initialized_registers)?;
-                    initialized_registers.insert(*reg);
-                    Ok(())
-                },
-                self::S::set_reg_binop_reg_int32 { reg, .. } => {
-                    initialized_registers.insert(*reg);
-                    Ok(())
-                },
-                self::S::set_reg_binop_reg_loc { reg, loc, .. } => {
-                    check_init_loc(loc, initialized_registers)?;
-                    initialized_registers.insert(*reg);
-                    Ok(())
-                },
-            }
-        }
+                self::S::with_label { label, .. } => {
+                    let is_a_new_label = labels.insert(label.clone());
 
-        fn check_init_p(
-            p: &self::P,
-            initialized_registers: &mut HashSet<cpsc411::Reg>,
-        ) -> Result<(), String> {
-            match p {
-                self::P::begin { ref ss } => {
-                    let errors = ss
-                        .iter()
-                        .filter_map(|s| {
-                            let result = check_init_s(s, initialized_registers);
-                            match result {
-                                Ok(()) => None,
-                                Err(err) => Some(err),
-                            }
-                        })
-                        .collect::<Vec<_>>();
-
-                    match errors.first() {
-                        Some(error) => Err(error),
-                        None => Ok(()),
-                    }?;
-
-                    let rax_is_initialized =
-                        initialized_registers.contains(&cpsc411::Reg::rax);
-
-                    match rax_is_initialized {
-                        // true => Ok(Paren_x64 { p }),
+                    match is_a_new_label {
                         true => Ok(()),
-                        false => Err(format!(
-                            "{:?} is not initialized",
-                            cpsc411::Reg::rax
-                        )),
+                        false => {
+                            let error_msg = format!(
+                                "The label, '{:?}', already exists.",
+                                label
+                            );
+                            Err(error_msg)
+                        },
                     }
                 },
+                _ => Ok(()),
             }
         }
 
-        check_init_p(&self.p, &mut initialized_registers)?;
+        fn check_jumps(s: &self::S, labels: &LabelStore) -> Result<(), String> {
+            match s {
+                self::S::jump_trg { trg } => check_trg(trg, labels),
+                self::S::compare_reg_opand_jump_if { label, .. } => {
+                    check_label(label, labels)
+                },
+                _ => Ok(()),
+            }
+        }
+
+        fn check_trg(
+            trg: &self::Trg,
+            labels: &LabelStore,
+        ) -> Result<(), String> {
+            match trg {
+                self::Trg::reg { .. } => Ok(()),
+                self::Trg::label { label } => check_label(label, labels),
+            }
+        }
+
+        fn check_label(
+            label: &cpsc411::Label,
+            labels: &LabelStore,
+        ) -> Result<(), String> {
+            let label_found = labels.contains(label);
+
+            match label_found {
+                true => Ok(()),
+                false => {
+                    let error_msg =
+                        format!("The label, '{:?}', was not found.", label);
+                    Err(error_msg)
+                },
+            }
+        }
+
+        check_p(&p)?;
         Ok(self)
     }
 
@@ -128,61 +107,6 @@ impl ParenX64 {
     /// Generate X64 source code in string form.
     pub fn generate_x64(self) -> String {
         let Self { p } = self;
-
-        fn generate_binop(binop: &cpsc411::Binop) -> String {
-            match binop {
-                cpsc411::Binop::plus => format!("add"),
-                cpsc411::Binop::multiply => format!("imul"),
-            }
-        }
-
-        fn generate_addr(Addr { fbp, disp_offset }: &self::Addr) -> String {
-            format!("QWORD [{:?} - {}]", fbp, disp_offset)
-        }
-
-        fn generate_loc(loc: &self::Loc) -> String {
-            match loc {
-                self::Loc::addr { addr } => generate_addr(addr),
-                self::Loc::reg { reg } => format!("{:?}", reg),
-            }
-        }
-
-        fn generate_triv(triv: &self::Triv) -> String {
-            match triv {
-                self::Triv::reg { reg } => format!("{:?}", reg),
-                self::Triv::int64 { int64 } => format!("{}", int64),
-            }
-        }
-
-        fn generate_s(s: &self::S) -> String {
-            match s {
-                self::S::set_addr_int32 { addr, int32 } => {
-                    let addr_as_string = generate_addr(addr);
-                    format!("mov {}, {}", addr_as_string, int32)
-                },
-                self::S::set_addr_reg { addr, reg } => {
-                    let addr_as_string = generate_addr(addr);
-                    format!("mov {}, {:?}", addr_as_string, reg)
-                },
-                self::S::set_reg_loc { reg, loc } => {
-                    let loc_as_string = generate_loc(loc);
-                    format!("mov {:?}, {}", reg, loc_as_string)
-                },
-                self::S::set_reg_triv { reg, triv } => {
-                    let triv_as_string = generate_triv(triv);
-                    format!("mov {:?}, {}", reg, triv_as_string)
-                },
-                self::S::set_reg_binop_reg_int32 { reg, binop, int32 } => {
-                    let binop_as_string = generate_binop(binop);
-                    format!("{} {:?}, {:?}", binop_as_string, reg, int32)
-                },
-                self::S::set_reg_binop_reg_loc { reg, binop, loc } => {
-                    let binop_as_string = generate_binop(binop);
-                    let loc_as_string = generate_loc(loc);
-                    format!("{} {:?}, {}", binop_as_string, reg, loc_as_string)
-                },
-            }
-        }
 
         fn generate_p(p: &self::P) -> String {
             match p {
@@ -195,18 +119,285 @@ impl ParenX64 {
             }
         }
 
+        fn generate_s(s: &self::S) -> String {
+            match s {
+                self::S::set_addr_int32 { addr, int32 } => {
+                    let addr = generate_addr(addr);
+                    format!("mov {}, {}", addr, int32)
+                },
+                self::S::set_addr_trg { addr, trg } => {
+                    let addr = generate_addr(addr);
+                    let trg = generate_trg(trg);
+
+                    format!("mov {}, {}", addr, trg)
+                },
+                self::S::set_reg_loc { reg, loc } => {
+                    let loc = generate_loc(loc);
+                    format!("mov {:?}, {}", reg, loc)
+                },
+                self::S::set_reg_triv { reg, triv } => {
+                    let triv = generate_triv(triv);
+                    format!("mov {:?}, {}", reg, triv)
+                },
+                self::S::set_reg_binop_reg_int32 { reg, binop, int32 } => {
+                    let binop = generate_binop(binop);
+                    format!("{} {:?}, {}", binop, reg, int32)
+                },
+                self::S::set_reg_binop_reg_loc { reg, binop, loc } => {
+                    let binop = generate_binop(binop);
+                    let loc = generate_loc(loc);
+
+                    format!("{} {:?}, {}", binop, reg, loc)
+                },
+                self::S::with_label { label, s } => {
+                    let label = generate_label(label);
+                    let s = generate_s(&s);
+
+                    format!("{}:\n{}", label, s)
+                },
+                self::S::jump_trg { trg } => {
+                    let trg = generate_trg(trg);
+                    format!("jmp {}", trg)
+                },
+                self::S::compare_reg_opand_jump_if {
+                    reg,
+                    opand,
+                    relop,
+                    label,
+                } => {
+                    let opand = generate_opand(opand);
+                    let cmp_instr = format!("cmp {:?}, {}", reg, opand);
+
+                    let relop = generate_relop(relop);
+                    let label = generate_label(label);
+                    let jmp_instr = format!("{} {}", relop, label);
+
+                    format!("{}\n{}", cmp_instr, jmp_instr)
+                },
+                self::S::nop => "".into(),
+            }
+        }
+
+        fn generate_triv(triv: &self::Triv) -> String {
+            match triv {
+                self::Triv::trg { trg } => format!("{:?}", trg),
+                self::Triv::int64 { int64 } => format!("{}", int64),
+            }
+        }
+
+        fn generate_label(label: &cpsc411::Label) -> String {
+            let cpsc411::Label { label } = label.clone();
+            label
+        }
+
+        fn generate_trg(trg: &self::Trg) -> String {
+            match trg {
+                self::Trg::reg { reg } => format!("{:#?}", reg),
+                self::Trg::label { label } => generate_label(label),
+            }
+        }
+
+        fn generate_addr(Addr { fbp, disp_offset }: &self::Addr) -> String {
+            format!("QWORD [{:?} - {}]", fbp, disp_offset)
+        }
+
+        fn generate_opand(opand: &self::Opand) -> String {
+            match opand {
+                self::Opand::int64 { int64 } => format!("{}", int64),
+                self::Opand::reg { reg } => format!("{:#?}", reg),
+            }
+        }
+
+        fn generate_loc(loc: &self::Loc) -> String {
+            match loc {
+                self::Loc::addr { addr } => generate_addr(addr),
+                self::Loc::reg { reg } => format!("{:?}", reg),
+            }
+        }
+
+        fn generate_binop(binop: &cpsc411::Binop) -> String {
+            match binop {
+                cpsc411::Binop::plus => "add",
+                cpsc411::Binop::multiply => "imul",
+            }
+            .into()
+        }
+
+        fn generate_relop(relop: &cpsc411::Relop) -> String {
+            match relop {
+                cpsc411::Relop::gt => "jg",
+                cpsc411::Relop::gte => "jge",
+                cpsc411::Relop::lt => "jl",
+                cpsc411::Relop::lte => "jle",
+                cpsc411::Relop::eq => "je",
+                cpsc411::Relop::neq => "jne",
+            }
+            .into()
+        }
+
         generate_p(&p)
+    }
+
+    /// LinkParenX64: ParenX64 -> ParenX64Rt
+    ///
+    /// ### Purpose:
+    /// Compiles Paren-x64 v4 to Paren-x64-rt v4 by resolving all labels to
+    /// their position in the instruction sequence.
+    pub fn link_paren_x64(self) -> target::ParenX64Rt {
+        type LabelStore = HashMap<cpsc411::Label, cpsc411::PcAddr>;
+
+        let Self { p } = self;
+
+        fn link_p(p: self::P) -> target::P {
+            let mut labels = LabelStore::default();
+
+            match p {
+                self::P::begin { ss } => {
+                    let halt_label = cpsc411::Label::halt_label();
+                    let halt_index = ss.len() as cpsc411::PcAddr;
+
+                    ss.iter().enumerate().for_each(|(curr_index, s)| {
+                        resolve_labels(s, &mut labels, curr_index);
+                    });
+
+                    labels.insert(halt_label, halt_index);
+
+                    let ss =
+                        ss.into_iter().map(|s| link_s(s, &labels)).collect();
+
+                    target::P::begin { ss }
+                },
+            }
+        }
+
+        fn resolve_labels(
+            s: &self::S,
+            labels: &mut LabelStore,
+            curr_index: cpsc411::PcAddr,
+        ) {
+            match s {
+                self::S::with_label { label, .. } => {
+                    labels.insert(label.clone(), curr_index);
+                },
+                _ => (),
+            }
+        }
+
+        fn link_s(s: self::S, labels: &LabelStore) -> target::S {
+            match s {
+                self::S::set_addr_int32 { addr, int32 } => {
+                    let addr = link_addr(addr);
+                    target::S::set_addr_int32 { addr, int32 }
+                },
+                self::S::set_addr_trg { addr, trg } => {
+                    let addr = link_addr(addr);
+                    let trg = link_trg(trg, labels);
+
+                    target::S::set_addr_trg { addr, trg }
+                },
+                self::S::set_reg_loc { reg, loc } => {
+                    let loc = link_loc(loc);
+                    target::S::set_reg_loc { reg, loc }
+                },
+                self::S::set_reg_triv { reg, triv } => {
+                    let triv = link_triv(triv, labels);
+                    target::S::set_reg_triv { reg, triv }
+                },
+                self::S::set_reg_binop_reg_int32 { reg, binop, int32 } => {
+                    target::S::set_reg_binop_reg_int32 { reg, binop, int32 }
+                },
+                self::S::set_reg_binop_reg_loc { reg, binop, loc } => {
+                    let loc = link_loc(loc);
+                    target::S::set_reg_binop_reg_loc { reg, binop, loc }
+                },
+                self::S::with_label { s, .. } => {
+                    let s = *s;
+                    link_s(s, labels)
+                },
+                self::S::jump_trg { trg } => {
+                    let trg = link_trg(trg, labels);
+                    target::S::jump_trg { trg }
+                },
+                self::S::compare_reg_opand_jump_if {
+                    reg,
+                    opand,
+                    relop,
+                    label,
+                } => {
+                    let opand = link_opand(opand);
+                    let pc_addr = *labels.get(&label).unwrap();
+
+                    target::S::compare_reg_opand_jump_if {
+                        reg,
+                        opand,
+                        relop,
+                        pc_addr,
+                    }
+                },
+                self::S::nop => target::S::nop,
+            }
+        }
+
+        fn link_addr(Addr { fbp, disp_offset }: self::Addr) -> target::Addr {
+            target::Addr { fbp, disp_offset }
+        }
+
+        fn link_triv(triv: self::Triv, labels: &LabelStore) -> target::Triv {
+            match triv {
+                self::Triv::int64 { int64 } => target::Triv::int64 { int64 },
+                self::Triv::trg { trg } => {
+                    let trg = link_trg(trg, labels);
+                    target::Triv::trg { trg }
+                },
+            }
+        }
+
+        fn link_loc(loc: self::Loc) -> target::Loc {
+            match loc {
+                self::Loc::reg { reg } => target::Loc::reg { reg },
+                self::Loc::addr { addr } => {
+                    let addr = link_addr(addr);
+                    target::Loc::addr { addr }
+                },
+            }
+        }
+
+        fn link_opand(opand: self::Opand) -> target::Opand {
+            match opand {
+                self::Opand::int64 { int64 } => target::Opand::int64 { int64 },
+                self::Opand::reg { reg } => target::Opand::reg { reg },
+            }
+        }
+
+        fn link_trg(trg: self::Trg, labels: &LabelStore) -> target::Trg {
+            match trg {
+                self::Trg::reg { reg } => target::Trg::reg { reg },
+                self::Trg::label { label } => {
+                    let pc_addr = *labels.get(&label).unwrap();
+                    target::Trg::pc_addr { pc_addr }
+                },
+            }
+        }
+
+        let p = link_p(p);
+        target::ParenX64Rt { p }
     }
 }
 
-/// Check: ParenX64 -> Result<(), String>
+/// Check: ParenX64 -> Result<ParenX64, String>
 ///
 /// ### Purpose:
 /// Check ParenX64 to make sure it's a valid ParenX64 program.
-/// - Need to assert registers are initialized before using.
+/// - Need to ensure all labels are unique.
+/// - Need to ensure all jumps reference an existing label.
+///
+/// ### Notes:
+/// In general, it cannot be checked that a register is initialized before
+/// usage. This is due to ParenX64 allowing for "control-flow", some of which
+/// may be dynamic and unable to be checked at compile-time.
 impl cpsc411::Check for ParenX64 {
     fn check(self) -> Result<Self, String> {
-        self.check_init()
+        self.check_labels()
     }
 }
 
@@ -218,101 +409,6 @@ impl cpsc411::Interpret for ParenX64 {
     type Output = i64;
 
     fn interpret(self) -> Self::Output {
-        let Self { p } = self;
-        let mut registers = HashMap::<cpsc411::Reg, i64>::new();
-        let mut addrs = HashMap::<self::Addr, i64>::new();
-
-        fn operate(binop: cpsc411::Binop, int64_1: i64, int64_2: i64) -> i64 {
-            match binop {
-                cpsc411::Binop::plus => int64_1 + int64_2,
-                cpsc411::Binop::multiply => int64_1 * int64_2,
-            }
-        }
-
-        fn get_value_in_loc(
-            loc: self::Loc,
-            registers: &HashMap<cpsc411::Reg, i64>,
-            addrs: &HashMap<self::Addr, i64>,
-        ) -> i64 {
-            match loc {
-                self::Loc::addr { addr } => {
-                    addrs.get(&addr).map(i64::clone).unwrap()
-                },
-                self::Loc::reg { reg } => {
-                    registers.get(&reg).map(i64::clone).unwrap()
-                },
-            }
-        }
-
-        fn get_value_in_triv(
-            triv: self::Triv,
-            registers: &HashMap<cpsc411::Reg, i64>,
-            _: &HashMap<self::Addr, i64>,
-        ) -> i64 {
-            match triv {
-                self::Triv::int64 { int64 } => int64,
-                self::Triv::reg { reg } => {
-                    registers.get(&reg).map(i64::clone).unwrap()
-                },
-            }
-        }
-
-        fn interpret_s(
-            s: self::S,
-            registers: &mut HashMap<cpsc411::Reg, i64>,
-            addrs: &mut HashMap<self::Addr, i64>,
-        ) {
-            match s {
-                self::S::set_addr_int32 { addr, int32 } => {
-                    addrs.insert(addr, int32 as i64);
-                },
-                self::S::set_addr_reg { addr, reg } => {
-                    let reg_value =
-                        registers.get(&reg).map(i64::clone).unwrap();
-
-                    addrs.insert(addr, reg_value);
-                },
-                self::S::set_reg_loc { reg, loc } => {
-                    let value_in_loc = get_value_in_loc(loc, registers, addrs);
-                    registers.insert(reg, value_in_loc);
-                },
-                self::S::set_reg_triv { reg, triv } => {
-                    let value_in_triv =
-                        get_value_in_triv(triv, registers, addrs);
-                    registers.insert(reg, value_in_triv);
-                },
-                self::S::set_reg_binop_reg_int32 { reg, binop, int32 } => {
-                    let prev_reg_value =
-                        registers.get(&reg).map(i64::clone).unwrap();
-                    let new_reg_value =
-                        operate(binop, prev_reg_value, int32 as i64);
-                    registers.insert(reg, new_reg_value);
-                },
-                self::S::set_reg_binop_reg_loc { reg, binop, loc } => {
-                    let prev_reg_value =
-                        registers.get(&reg).map(i64::clone).unwrap();
-                    let value_in_loc = get_value_in_loc(loc, registers, addrs);
-                    let new_reg_value =
-                        operate(binop, prev_reg_value, value_in_loc);
-                    registers.insert(reg, new_reg_value);
-                },
-            }
-        }
-
-        fn interpret_p(
-            p: self::P,
-            registers: &mut HashMap<cpsc411::Reg, i64>,
-            addrs: &mut HashMap<self::Addr, i64>,
-        ) -> i64 {
-            match p {
-                self::P::begin { ss } => {
-                    ss.into_iter()
-                        .for_each(|s| interpret_s(s, registers, addrs));
-                    registers.get(&cpsc411::Reg::rax).map(i64::clone).unwrap()
-                },
-            }
-        }
-
-        interpret_p(p, &mut registers, &mut addrs)
+        self.link_paren_x64().interpret()
     }
 }

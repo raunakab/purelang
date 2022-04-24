@@ -51,6 +51,7 @@ impl ValuesLang {
 
                     target::Tail::r#let { bindings, tail }
                 },
+                _ => todo!(),
             }
         }
 
@@ -84,6 +85,7 @@ impl ValuesLang {
 
                     target::Value::r#let { bindings, value }
                 },
+                _ => todo!(),
             }
         }
 

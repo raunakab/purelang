@@ -1,33 +1,54 @@
 use crate::cpsc411;
-use crate::cpsc411::Fvar;
-use crate::cpsc411::Reg;
 
 pub enum P {
-    begin { effects: Vec<Effect>, halt: Halt },
+    begin { ss: Vec<S> },
 }
 
-pub enum Effect {
+pub enum S {
+    halt {
+        opand: Opand,
+    },
     set_loc_triv {
         loc: Loc,
         triv: Triv,
     },
-    set_loc_binop_triv {
+    set_loc_binop_opand {
         loc: Loc,
         binop: cpsc411::Binop,
-        triv: Triv,
+        opand: Opand,
     },
+    jump {
+        trg: Trg,
+    },
+    with_label {
+        label: cpsc411::Label,
+        s: Box<Self>,
+    },
+    compare_jump {
+        loc: Loc,
+        opand: Opand,
+        relop: cpsc411::Relop,
+        trg: Trg,
+    },
+    nop,
 }
 
 pub enum Loc {
-    reg { reg: Reg },
-    fvar { fvar: Fvar },
+    reg { reg: cpsc411::Reg },
+    fvar { fvar: cpsc411::Fvar },
 }
 
 pub enum Triv {
-    loc { loc: Loc },
-    int64 { int64: i64 },
+    opand { opand: Opand },
+    label { label: cpsc411::Label },
 }
 
-pub struct Halt {
-    pub triv: Triv,
+pub enum Trg {
+    label { label: cpsc411::Label },
+    loc { loc: Loc },
+}
+
+pub enum Opand {
+    int64 { int64: i64 },
+    loc { loc: Loc },
 }
