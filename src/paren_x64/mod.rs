@@ -197,7 +197,9 @@ impl ParenX64 {
             }
         }
 
-        fn generate_addr(Addr { fbp, disp_offset }: &self::Addr) -> String {
+        fn generate_addr(
+            cpsc411::Addr { fbp, disp_offset }: &cpsc411::Addr,
+        ) -> String {
             format!("QWORD [{:?} - {}]", fbp, disp_offset)
         }
 
@@ -286,18 +288,15 @@ impl ParenX64 {
         fn link_s(s: self::S, labels: &LabelStore) -> target::S {
             match s {
                 self::S::set_addr_int32 { addr, int32 } => {
-                    let addr = link_addr(addr);
                     target::S::set_addr_int32 { addr, int32 }
                 },
                 self::S::set_addr_trg { addr, trg } => {
-                    let addr = link_addr(addr);
                     let trg = link_trg(trg, labels);
-
                     target::S::set_addr_trg { addr, trg }
                 },
-                self::S::set_reg_loc { reg, loc } => {
-                    let loc = link_loc(loc);
-                    target::S::set_reg_loc { reg, loc }
+                self::S::set_reg_loc { reg, loc } => target::S::set_reg_loc {
+                    reg,
+                    loc: loc.into(),
                 },
                 self::S::set_reg_triv { reg, triv } => {
                     let triv = link_triv(triv, labels);
@@ -307,8 +306,11 @@ impl ParenX64 {
                     target::S::set_reg_binop_reg_int32 { reg, binop, int32 }
                 },
                 self::S::set_reg_binop_reg_loc { reg, binop, loc } => {
-                    let loc = link_loc(loc);
-                    target::S::set_reg_binop_reg_loc { reg, binop, loc }
+                    target::S::set_reg_binop_reg_loc {
+                        reg,
+                        binop,
+                        loc: loc.into(),
+                    }
                 },
                 self::S::with_label { s, .. } => {
                     let s = *s;
@@ -324,22 +326,17 @@ impl ParenX64 {
                     relop,
                     label,
                 } => {
-                    let opand = link_opand(opand);
                     let pc_addr = *labels.get(&label).unwrap();
 
                     target::S::compare_reg_opand_jump_if {
                         reg,
-                        opand,
+                        opand: opand.into(),
                         relop,
                         pc_addr,
                     }
                 },
                 self::S::nop => target::S::nop,
             }
-        }
-
-        fn link_addr(Addr { fbp, disp_offset }: self::Addr) -> target::Addr {
-            target::Addr { fbp, disp_offset }
         }
 
         fn link_triv(triv: self::Triv, labels: &LabelStore) -> target::Triv {
@@ -349,23 +346,6 @@ impl ParenX64 {
                     let trg = link_trg(trg, labels);
                     target::Triv::trg { trg }
                 },
-            }
-        }
-
-        fn link_loc(loc: self::Loc) -> target::Loc {
-            match loc {
-                self::Loc::reg { reg } => target::Loc::reg { reg },
-                self::Loc::addr { addr } => {
-                    let addr = link_addr(addr);
-                    target::Loc::addr { addr }
-                },
-            }
-        }
-
-        fn link_opand(opand: self::Opand) -> target::Opand {
-            match opand {
-                self::Opand::int64 { int64 } => target::Opand::int64 { int64 },
-                self::Opand::reg { reg } => target::Opand::reg { reg },
             }
         }
 

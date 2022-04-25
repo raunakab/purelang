@@ -555,99 +555,93 @@ impl AsmLang {
     /// abstract location with its assigned physical location from the
     /// assignment info field.
     fn replace_locations(self) -> target::NestedAsmLang {
-        let Self { p } = self;
+        // let Self { p } = self;
+        // fn replace_p(p: self::P) -> target::P {
+        //     match p {
+        //         self::P::module {
+        //             info: cpsc411::Info { assignment, .. },
+        //             tail,
+        //         } => {
+        //             let assignment = assignment.unwrap();
+        //             let tail = Box::new(tail);
+        //             let tail = replace_tail(tail, &assignment);
+        //             target::P::tail { tail }
+        //         },
+        //     }
+        // }
+        // fn replace_tail(
+        //     tail: Box<self::Tail>,
+        //     assignment: &cpsc411::Assignments<target::Loc>,
+        // ) -> target::Tail {
+        //     match *tail {
+        //         self::Tail::halt { triv } => {
+        //             let triv = replace_triv(triv, assignment);
+        //             target::Tail::halt { triv }
+        //         },
+        //         self::Tail::begin { effects, tail } => {
+        //             let effects = replace_effects(effects, assignment);
+        //             let tail = replace_tail(tail, assignment);
+        //             let tail = Box::new(tail);
+        //             target::Tail::begin { effects, tail }
+        //         },
+        //     }
+        // }
+        // fn replace_effects(
+        //     effects: Vec<self::Effect>,
+        //     assignment: &cpsc411::Assignments<target::Loc>,
+        // ) -> Vec<target::Effect> {
+        //     effects
+        //         .into_iter()
+        //         .map(|effect| replace_effect(effect, assignment))
+        //         .collect::<Vec<_>>()
+        // }
+        // fn replace_effect(
+        //     effect: self::Effect,
+        //     assignment: &cpsc411::Assignments<target::Loc>,
+        // ) -> target::Effect {
+        //     match effect {
+        //         self::Effect::set_aloc_triv { aloc, triv } => {
+        //             let loc =
+        //
+        // assignment.get(&aloc).map(target::Loc::clone).unwrap();
+        //             let triv = replace_triv(triv, assignment);
+        //             target::Effect::set_loc_triv { loc, triv }
+        //         },
+        //         self::Effect::set_aloc_binop_aloc_triv {
+        //             aloc,
+        //             binop,
+        //             triv,
+        //         } => {
+        //             let loc =
+        //
+        // assignment.get(&aloc).map(target::Loc::clone).unwrap();
+        //             let triv = replace_triv(triv, assignment);
+        //             target::Effect::set_loc_binop_triv { loc, binop, triv }
+        //         },
+        //         self::Effect::begin { effects } => {
+        //             let effects = replace_effects(effects, assignment);
+        //             target::Effect::begin { effects }
+        //         },
+        //     }
+        // }
+        // fn replace_triv(
+        //     triv: self::Triv,
+        //     assignment: &cpsc411::Assignments<target::Loc>,
+        // ) -> target::Triv {
+        //     match triv {
+        //         self::Triv::int64 { int64 } => target::Triv::int64 { int64 },
+        //         self::Triv::aloc { aloc } => {
+        //             let loc =
+        //
+        // assignment.get(&aloc).map(target::Loc::clone).unwrap();
+        //             target::Triv::loc { loc }
+        //         },
+        //     }
+        // }
+        // let p = replace_p(p);
+        // target::NestedAsmLang { p }
 
-        fn replace_p(p: self::P) -> target::P {
-            match p {
-                self::P::module {
-                    info: cpsc411::Info { assignment, .. },
-                    tail,
-                } => {
-                    let assignment = assignment.unwrap();
-
-                    let tail = Box::new(tail);
-                    let tail = replace_tail(tail, &assignment);
-
-                    target::P::tail { tail }
-                },
-            }
-        }
-
-        fn replace_tail(
-            tail: Box<self::Tail>,
-            assignment: &cpsc411::Assignments<target::Loc>,
-        ) -> target::Tail {
-            match *tail {
-                self::Tail::halt { triv } => {
-                    let triv = replace_triv(triv, assignment);
-                    target::Tail::halt { triv }
-                },
-                self::Tail::begin { effects, tail } => {
-                    let effects = replace_effects(effects, assignment);
-                    let tail = replace_tail(tail, assignment);
-                    let tail = Box::new(tail);
-
-                    target::Tail::begin { effects, tail }
-                },
-            }
-        }
-
-        fn replace_effects(
-            effects: Vec<self::Effect>,
-            assignment: &cpsc411::Assignments<target::Loc>,
-        ) -> Vec<target::Effect> {
-            effects
-                .into_iter()
-                .map(|effect| replace_effect(effect, assignment))
-                .collect::<Vec<_>>()
-        }
-
-        fn replace_effect(
-            effect: self::Effect,
-            assignment: &cpsc411::Assignments<target::Loc>,
-        ) -> target::Effect {
-            match effect {
-                self::Effect::set_aloc_triv { aloc, triv } => {
-                    let loc =
-                        assignment.get(&aloc).map(target::Loc::clone).unwrap();
-                    let triv = replace_triv(triv, assignment);
-
-                    target::Effect::set_loc_triv { loc, triv }
-                },
-                self::Effect::set_aloc_binop_aloc_triv {
-                    aloc,
-                    binop,
-                    triv,
-                } => {
-                    let loc =
-                        assignment.get(&aloc).map(target::Loc::clone).unwrap();
-                    let triv = replace_triv(triv, assignment);
-
-                    target::Effect::set_loc_binop_triv { loc, binop, triv }
-                },
-                self::Effect::begin { effects } => {
-                    let effects = replace_effects(effects, assignment);
-                    target::Effect::begin { effects }
-                },
-            }
-        }
-
-        fn replace_triv(
-            triv: self::Triv,
-            assignment: &cpsc411::Assignments<target::Loc>,
-        ) -> target::Triv {
-            match triv {
-                self::Triv::int64 { int64 } => target::Triv::int64 { int64 },
-                self::Triv::aloc { aloc } => {
-                    let loc =
-                        assignment.get(&aloc).map(target::Loc::clone).unwrap();
-                    target::Triv::loc { loc }
-                },
-            }
-        }
-
-        let p = replace_p(p);
-        target::NestedAsmLang { p }
+        todo!()
     }
 
     /// AssignHomes: AsmLang -> NestedAsmLang
@@ -689,7 +683,10 @@ impl Compile for AsmLang {
                 self.assign_homes_opt()
             },
         }
-        .flatten_begins()
+        .optimize_predicates()
+        .expose_basic_blocks()
+        .resolve_predicates()
+        .flatten_program()
         .patch_instructions()
         .implement_fvars()
     }

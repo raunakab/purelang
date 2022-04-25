@@ -10,11 +10,11 @@ pub enum P {
 #[derive(Clone)]
 pub enum S {
     set_addr_int32 {
-        addr: Addr,
+        addr: cpsc411::Addr,
         int32: i32,
     },
     set_addr_trg {
-        addr: Addr,
+        addr: cpsc411::Addr,
         trg: Trg,
     },
     set_reg_loc {
@@ -50,13 +50,7 @@ pub enum S {
 #[derive(Clone, Hash, PartialEq, Eq)]
 pub enum Loc {
     reg { reg: cpsc411::Reg },
-    addr { addr: Addr },
-}
-
-#[derive(Clone, Hash, PartialEq, Eq)]
-pub struct Addr {
-    pub fbp: cpsc411::Reg,
-    pub disp_offset: usize,
+    addr { addr: cpsc411::Addr },
 }
 
 #[derive(Clone)]

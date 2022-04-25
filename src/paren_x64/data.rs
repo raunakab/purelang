@@ -1,5 +1,3 @@
-use std::hash::Hash;
-
 use crate::cpsc411;
 
 #[derive(Clone)]
@@ -10,11 +8,11 @@ pub enum P {
 #[derive(Clone)]
 pub enum S {
     set_addr_int32 {
-        addr: Addr,
+        addr: cpsc411::Addr,
         int32: i32,
     },
     set_addr_trg {
-        addr: Addr,
+        addr: cpsc411::Addr,
         trg: Trg,
     },
     set_reg_loc {
@@ -51,17 +49,7 @@ pub enum S {
     nop,
 }
 
-#[derive(Clone)]
-pub enum Loc {
-    reg { reg: cpsc411::Reg },
-    addr { addr: Addr },
-}
-
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
-pub struct Addr {
-    pub fbp: cpsc411::Reg,
-    pub disp_offset: usize,
-}
+pub type Loc = super::target::Loc;
 
 #[derive(Clone)]
 pub enum Triv {
@@ -69,11 +57,7 @@ pub enum Triv {
     int64 { int64: i64 },
 }
 
-#[derive(Clone)]
-pub enum Opand {
-    int64 { int64: i64 },
-    reg { reg: cpsc411::Reg },
-}
+pub type Opand = super::target::Opand;
 
 #[derive(Debug, Clone)]
 pub enum Trg {

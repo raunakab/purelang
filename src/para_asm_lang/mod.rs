@@ -96,7 +96,6 @@ impl ParaAsmLang {
 
                             // reg <- loc
                             self::Opand::loc { loc } => {
-                                let loc = patch_loc(loc);
                                 let instr = target::S::set_reg_loc { reg, loc };
 
                                 vec![instr]
@@ -223,7 +222,6 @@ impl ParaAsmLang {
 
                         // reg <- reg + loc
                         (self::Loc::reg { reg }, self::Opand::loc { loc }) => {
-                            let loc = patch_loc(loc);
                             let instr = target::S::set_reg_binop_reg_loc {
                                 reg,
                                 binop,
@@ -719,7 +717,10 @@ impl ParaAsmLang {
                                 reg: aux_reg,
                                 loc: target::Loc::fvar { fvar },
                             };
-                            let instr2 = target::S::set_reg_loc { reg: aux_reg_2, loc: target::Loc::fvar { fvar: fvar2 } };
+                            let instr2 = target::S::set_reg_loc {
+                                reg: aux_reg_2,
+                                loc: target::Loc::fvar { fvar: fvar2 },
+                            };
                             let instr3 = target::S::compare_reg_opand_jump_if {
                                 reg: aux_reg,
                                 opand: target::Opand::reg { reg: aux_reg_2 },
@@ -874,13 +875,6 @@ impl ParaAsmLang {
                     let instr = target::S::nop;
                     vec![instr]
                 },
-            }
-        }
-
-        fn patch_loc(loc: self::Loc) -> target::Loc {
-            match loc {
-                self::Loc::reg { reg } => target::Loc::reg { reg },
-                self::Loc::fvar { fvar } => target::Loc::fvar { fvar },
             }
         }
 

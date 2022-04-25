@@ -33,10 +33,7 @@ pub enum S {
     nop,
 }
 
-pub enum Loc {
-    reg { reg: cpsc411::Reg },
-    fvar { fvar: cpsc411::Fvar },
-}
+pub type Loc = super::target::Loc;
 
 pub enum Triv {
     opand { opand: Opand },

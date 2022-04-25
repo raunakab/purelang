@@ -1,7 +1,28 @@
 use crate::cpsc411;
 
 pub enum P {
-    tail { tail: Tail },
+    module { tail: Tail },
+}
+
+pub enum Pred {
+    relop {
+        loc: Loc,
+        triv: Triv,
+    },
+    r#true,
+    r#false,
+    not {
+        pred: Box<Self>,
+    },
+    begin {
+        effects: Vec<Effect>,
+        pred: Box<Self>,
+    },
+    r#if {
+        pred1: Box<Self>,
+        pred2: Box<Self>,
+        pred3: Box<Self>,
+    },
 }
 
 pub enum Tail {
@@ -10,16 +31,21 @@ pub enum Tail {
     },
     begin {
         effects: Vec<Effect>,
-        tail: Box<Tail>,
+        tail: Box<Self>,
+    },
+    r#if {
+        pred: Pred,
+        tail1: Box<Self>,
+        tail2: Box<Self>,
     },
 }
 
 pub enum Effect {
-    set_loc_triv {
+    set {
         loc: Loc,
         triv: Triv,
     },
-    set_loc_binop_triv {
+    set_binop {
         loc: Loc,
         binop: cpsc411::Binop,
         triv: Triv,
@@ -27,15 +53,13 @@ pub enum Effect {
     begin {
         effects: Vec<Effect>,
     },
+    r#if {
+        pred: Pred,
+        effect1: Box<Self>,
+        effect2: Box<Self>,
+    },
 }
 
-#[derive(Debug, Hash, Clone, PartialEq, Eq)]
-pub enum Loc {
-    reg { reg: cpsc411::Reg },
-    fvar { fvar: cpsc411::Fvar },
-}
+pub type Loc = super::target::Loc;
 
-pub enum Triv {
-    int64 { int64: i64 },
-    loc { loc: Loc },
-}
+pub type Triv = super::target::Opand;

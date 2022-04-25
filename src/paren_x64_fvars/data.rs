@@ -47,22 +47,14 @@ pub enum S {
     nop,
 }
 
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub enum Loc {
     reg { reg: cpsc411::Reg },
     fvar { fvar: cpsc411::Fvar },
 }
 
-pub enum Triv {
-    trg { trg: Trg },
-    int64 { int64: i64 },
-}
+pub type Triv = super::target::Triv;
 
-pub enum Trg {
-    reg { reg: cpsc411::Reg },
-    label { label: cpsc411::Label },
-}
+pub type Trg = super::target::Trg;
 
-pub enum Opand {
-    int64 { int64: i64 },
-    reg { reg: cpsc411::Reg },
-}
+pub type Opand = super::target::Opand;

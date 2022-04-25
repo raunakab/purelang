@@ -141,6 +141,12 @@ impl Reg {
     }
 }
 
+#[derive(Clone, Hash, PartialEq, Eq)]
+pub struct Addr {
+    pub fbp: Reg,
+    pub disp_offset: usize,
+}
+
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 pub enum Binop {
     plus,

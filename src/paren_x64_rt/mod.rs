@@ -8,7 +8,7 @@ pub use self::data::*;
 use crate::cpsc411;
 
 type RegEnv = HashMap<cpsc411::Reg, i64>;
-type AddrEnv = HashMap<self::Addr, i64>;
+type AddrEnv = HashMap<cpsc411::Addr, i64>;
 
 pub struct ParenX64Rt {
     pub p: self::P,
@@ -158,7 +158,7 @@ impl cpsc411::Interpret for ParenX64Rt {
             reg_env.get(reg).map(i64::clone).unwrap()
         }
 
-        fn get_from_addr(addr: &self::Addr, addr_env: &AddrEnv) -> i64 {
+        fn get_from_addr(addr: &cpsc411::Addr, addr_env: &AddrEnv) -> i64 {
             addr_env.get(addr).map(i64::clone).unwrap()
         }
 

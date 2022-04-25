@@ -87,11 +87,11 @@ impl ParenX64Fvars {
 
         fn implement_fvar(
             cpsc411::Fvar { index }: cpsc411::Fvar,
-        ) -> target::Addr {
+        ) -> cpsc411::Addr {
             let fbp = cpsc411::Reg::current_frame_base_pointer();
             let disp_offset = index * 8;
 
-            target::Addr { fbp, disp_offset }
+            cpsc411::Addr { fbp, disp_offset }
         }
 
         fn implement_opand(opand: self::Opand) -> target::Opand {
