@@ -2,7 +2,7 @@ pub mod data;
 #[cfg(test)]
 mod tests;
 
-use std::collections::HashMap;
+use std::{collections::HashMap, cmp::Ordering};
 
 pub use self::data::*;
 use crate::cpsc411;
@@ -26,6 +26,7 @@ impl cpsc411::Interpret for ParenX64Rt {
         enum Control {
             next,
             jump { pc_addr: cpsc411::PcAddr },
+            // halt,
         }
 
         let Self { p } = self;
@@ -37,12 +38,13 @@ impl cpsc411::Interpret for ParenX64Rt {
 
             match p {
                 self::P::begin { ss } => {
-                    let max_pc_addr = ss.len() - 1usize;
+                    let halt_pc_addr = ss.len() - 1usize;
 
                     loop {
-                        match pc_addr <= max_pc_addr {
-                            true => (),
-                            false => break,
+                        match pc_addr.cmp(&halt_pc_addr) {
+                            Ordering::Equal => break,
+                            Ordering::Less => (),
+                            Ordering::Greater => unreachable!(),
                         };
 
                         let s = ss.get(pc_addr).unwrap();
