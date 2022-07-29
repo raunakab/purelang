@@ -1,19 +1,18 @@
 use crate::cpsc411;
 
 pub enum P {
-    module { tail: Tail },
+    module(Tail),
 }
 
 pub enum Pred {
     relop {
+        relop: cpsc411::Relop,
         loc: Loc,
         triv: Triv,
     },
     r#true,
     r#false,
-    not {
-        pred: Box<Self>,
-    },
+    not(Box<Self>),
     begin {
         effects: Vec<Effect>,
         pred: Box<Self>,
@@ -26,9 +25,7 @@ pub enum Pred {
 }
 
 pub enum Tail {
-    halt {
-        triv: Triv,
-    },
+    halt(Triv),
     begin {
         effects: Vec<Effect>,
         tail: Box<Self>,
@@ -50,9 +47,7 @@ pub enum Effect {
         binop: cpsc411::Binop,
         triv: Triv,
     },
-    begin {
-        effects: Vec<Effect>,
-    },
+    begin(Vec<Self>),
     r#if {
         pred: Pred,
         effect1: Box<Self>,

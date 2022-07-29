@@ -1,13 +1,11 @@
 use crate::cpsc411;
 
 pub enum P {
-    begin { ss: Vec<S> },
+    begin(Vec<S>),
 }
 
 pub enum S {
-    halt {
-        opand: Opand,
-    },
+    halt(Opand),
     set_loc_triv {
         loc: Loc,
         triv: Triv,
@@ -17,9 +15,7 @@ pub enum S {
         binop: cpsc411::Binop,
         opand: Opand,
     },
-    jump {
-        trg: Trg,
-    },
+    jump(Trg),
     with_label {
         label: cpsc411::Label,
         s: Box<Self>,
@@ -35,17 +31,23 @@ pub enum S {
 
 pub type Loc = super::target::Loc;
 
+#[derive(Clone)]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum Triv {
-    opand { opand: Opand },
-    label { label: cpsc411::Label },
+    opand(Opand),
+    label(cpsc411::Label),
 }
 
+#[derive(Clone)]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum Trg {
-    label { label: cpsc411::Label },
-    loc { loc: Loc },
+    label(cpsc411::Label),
+    loc(Loc),
 }
 
+#[derive(Clone)]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum Opand {
-    int64 { int64: i64 },
-    loc { loc: Loc },
+    int64(i64),
+    loc(Loc),
 }

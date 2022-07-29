@@ -41,11 +41,9 @@ fn basic() {
         } => {
             assert_eq!(
                 assignment.unwrap(),
-                vec![(aloc, target::Loc::reg {
-                    reg: cpsc411::Reg::r9
-                }),]
-                .into_iter()
-                .collect(),
+                vec![(aloc, target::Loc::reg(cpsc411::Reg::r9)),]
+                    .into_iter()
+                    .collect(),
             );
         },
     }
@@ -93,11 +91,9 @@ fn basic_without_registers() {
         } => {
             assert_eq!(
                 assignment.unwrap(),
-                vec![(aloc, target::Loc::fvar {
-                    fvar: cpsc411::Fvar::fresh()
-                }),]
-                .into_iter()
-                .collect(),
+                vec![(aloc, target::Loc::fvar(cpsc411::Fvar::fresh())),]
+                    .into_iter()
+                    .collect(),
             );
         },
     };
@@ -142,11 +138,9 @@ fn intermediary() {
         } => {
             assert_eq!(
                 assignment.unwrap(),
-                vec![(aloc, target::Loc::reg {
-                    reg: cpsc411::Reg::r9
-                }),]
-                .into_iter()
-                .collect(),
+                vec![(aloc, target::Loc::reg(cpsc411::Reg::r9)),]
+                    .into_iter()
+                    .collect(),
             );
         },
     }

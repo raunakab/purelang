@@ -10,7 +10,9 @@ use lazy_static::lazy_static;
 use crate::paren_x64;
 
 pub type AlocSet = HashSet<Aloc>;
+
 pub type Assignments<Loc> = HashMap<Aloc, Loc>;
+
 pub type PcAddr = usize;
 
 lazy_static! {
@@ -179,16 +181,14 @@ impl std::ops::Not for Relop {
 }
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
-pub struct Label {
-    pub label: String,
-}
+pub struct Label(pub String);
 
 impl Label {
     pub fn new() -> Self {
         let index = fresh_index(&LABEL_INDEX);
         let label = format!("L.tmp.{}", index);
 
-        Self { label }
+        Self(label)
     }
 
     pub fn new_with_name<I>(name: I) -> Self
@@ -199,12 +199,13 @@ impl Label {
         let name = String::from(name);
         let label = format!("L.{}.{}", name, index);
 
-        Self { label }
+        Self(label)
     }
 
     pub fn halt_label() -> Self {
         let label = format!("L.done");
-        Self { label }
+
+        Self(label)
     }
 }
 

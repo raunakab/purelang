@@ -1,36 +1,36 @@
 use crate::cpsc411;
 
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum P {
-    module { bs: Vec<B> },
+    module(Vec<B>),
 }
 
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum B {
-    define_label_tail { label: cpsc411::Label, tail: Tail },
+    define { label: cpsc411::Label, tail: Tail },
 }
 
+#[derive(Clone)]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum Pred {
-    relop_loc_opand {
+    relop {
         relop: cpsc411::Relop,
         loc: Loc,
         opand: Opand,
     },
     r#true,
     r#false,
-    not {
-        pred: Box<Pred>,
-    },
+    not(Box<Self>),
 }
 
+#[derive(Clone)]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum Tail {
-    halt {
-        opand: Opand,
-    },
-    jump {
-        trg: Trg,
-    },
+    halt(Opand),
+    jump(Trg),
     begin {
         effects: Vec<Effect>,
-        tail: Box<Tail>,
+        tail: Box<Self>,
     },
     r#if {
         pred: Pred,
@@ -40,6 +40,8 @@ pub enum Tail {
 }
 
 pub type Effect = super::target::Effect;
+
+pub type Triv = super::target::Triv;
 
 pub type Opand = super::target::Opand;
 

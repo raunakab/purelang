@@ -5,9 +5,7 @@ mod tests;
 pub use self::data::*;
 use crate::para_asm_lang as target;
 
-pub struct BlockAsmLang {
-    pub p: self::P,
-}
+pub struct BlockAsmLang(pub self::P);
 
 impl BlockAsmLang {
     /// FlattenProgram: BlockAsmLang -> ParaAsmLang
@@ -16,13 +14,14 @@ impl BlockAsmLang {
     /// Compile Block-asm-lang v4 to Para-asm-lang v4 by flattening basic blocks
     /// into labeled instructions.
     pub fn flatten_program(self) -> target::ParaAsmLang {
-        let Self { p } = self;
+        let Self(p) = self;
 
         fn flatten_p(p: self::P) -> target::P {
             match p {
-                self::P::module { bs } => {
+                self::P::module(bs) => {
                     let ss = flatten_bs(bs);
-                    target::P::begin { ss }
+
+                    target::P::begin(ss)
                 },
             }
         }
@@ -51,13 +50,23 @@ impl BlockAsmLang {
 
         fn flatten_tail(tail: self::Tail) -> Vec<target::S> {
             match tail {
-                self::Tail::halt { opand } => vec![target::S::halt { opand }],
-                self::Tail::jump { trg } => vec![target::S::jump { trg }],
+                self::Tail::halt(opand) => {
+                    let instr = target::S::halt(opand);
+
+                    vec![instr]
+                },
+                self::Tail::jump(trg) => {
+                    let instr = target::S::jump(trg);
+
+                    vec![instr]
+                },
                 self::Tail::begin { effects, tail } => {
                     let mut ss = flatten_effects(effects);
+
                     let ss_tail = flatten_tail(*tail);
 
                     ss.extend(ss_tail);
+
                     ss
                 },
                 self::Tail::r#if {
@@ -73,7 +82,9 @@ impl BlockAsmLang {
                         relop,
                         trg: trg1,
                     };
-                    let instr2 = target::S::jump { trg: trg2 };
+
+                    let instr2 = target::S::jump(trg2);
+
                     vec![instr1, instr2]
                 },
             }
@@ -95,6 +106,7 @@ impl BlockAsmLang {
         }
 
         let p = flatten_p(p);
-        target::ParaAsmLang { p }
+
+        target::ParaAsmLang(p)
     }
 }

@@ -136,7 +136,7 @@ impl AsmLang {
                         .map(|aloc| {
                             let aloc = aloc.clone();
                             let fvar = cpsc411::Fvar::fresh();
-                            let loc = target::Loc::fvar { fvar };
+                            let loc = target::Loc::fvar(fvar);
                             (aloc, loc)
                         })
                         .collect();
@@ -147,9 +147,8 @@ impl AsmLang {
                     let info = cpsc411::Info {
                         locals,
                         assignment,
-                        ..info
-                        // undead_out,
-                        // conflicts,
+                        ..info /* undead_out,
+                                * conflicts, */
                     };
 
                     self::P::module { info, tail }
@@ -432,7 +431,7 @@ impl AsmLang {
                 .into_iter()
                 .filter_map(|reg| {
                     let reg = *reg;
-                    let loc = target::Loc::reg { reg };
+                    let loc = target::Loc::reg(reg);
 
                     let is_already_assigned = locs.contains(&loc);
                     match is_already_assigned {
@@ -532,10 +531,8 @@ impl AsmLang {
                         k,
                     )
                     .get(0)
-                    .map(|reg| target::Loc::reg { reg: *reg })
-                    .unwrap_or(target::Loc::fvar {
-                        fvar: cpsc411::Fvar::fresh(),
-                    });
+                    .map(|reg| target::Loc::reg(*reg))
+                    .unwrap_or(target::Loc::fvar(cpsc411::Fvar::fresh()));
 
                     assignments.insert(aloc, loc);
 

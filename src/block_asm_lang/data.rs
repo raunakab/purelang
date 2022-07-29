@@ -1,7 +1,7 @@
 use crate::cpsc411;
 
 pub enum P {
-    module { bs: Vec<B> },
+    module(Vec<B>),
 }
 
 pub enum B {
@@ -9,12 +9,8 @@ pub enum B {
 }
 
 pub enum Tail {
-    halt {
-        opand: Opand,
-    },
-    jump {
-        trg: Trg,
-    },
+    halt(Opand),
+    jump(Trg),
     begin {
         effects: Vec<Effect>,
         tail: Box<Tail>,
@@ -28,6 +24,8 @@ pub enum Tail {
     },
 }
 
+#[derive(Clone)]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum Effect {
     set {
         loc: Loc,

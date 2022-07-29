@@ -4,7 +4,7 @@ use crate::cpsc411;
 
 #[derive(Clone)]
 pub enum P {
-    begin { ss: Vec<S> },
+    begin(Vec<S>),
 }
 
 #[derive(Clone)]
@@ -35,9 +35,7 @@ pub enum S {
         binop: cpsc411::Binop,
         loc: Loc,
     },
-    jump_trg {
-        trg: Trg,
-    },
+    jump_trg(Trg),
     compare_reg_opand_jump_if {
         reg: cpsc411::Reg,
         opand: Opand,
@@ -49,24 +47,24 @@ pub enum S {
 
 #[derive(Clone, Hash, PartialEq, Eq)]
 pub enum Loc {
-    reg { reg: cpsc411::Reg },
-    addr { addr: cpsc411::Addr },
+    reg(cpsc411::Reg),
+    addr(cpsc411::Addr),
 }
 
 #[derive(Clone)]
 pub enum Triv {
-    trg { trg: Trg },
-    int64 { int64: i64 },
+    trg(Trg),
+    int64(i64),
 }
 
 #[derive(Clone)]
 pub enum Opand {
-    int64 { int64: i64 },
-    reg { reg: cpsc411::Reg },
+    int64(i64),
+    reg(cpsc411::Reg),
 }
 
 #[derive(Debug, Clone)]
 pub enum Trg {
-    reg { reg: cpsc411::Reg },
-    pc_addr { pc_addr: cpsc411::PcAddr },
+    reg(cpsc411::Reg),
+    pc_addr(cpsc411::PcAddr),
 }

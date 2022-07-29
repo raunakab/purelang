@@ -2,7 +2,8 @@ pub mod data;
 #[cfg(test)]
 mod tests;
 
-use std::{collections::HashMap, cmp::Ordering};
+use std::cmp::Ordering;
+use std::collections::HashMap;
 
 pub use self::data::*;
 use crate::cpsc411;
@@ -37,21 +38,20 @@ impl cpsc411::Interpret for ParenX64Rt {
             let mut pc_addr = cpsc411::PcAddr::default();
 
             match p {
-                self::P::begin { ss } => {
-                    let halt_pc_addr = ss.len() - 1usize;
+                self::P::begin(ss) => {
+                    let max_pc_addr = ss.len();
 
                     loop {
-                        match pc_addr.cmp(&halt_pc_addr) {
-                            Ordering::Equal => break,
+                        match pc_addr.cmp(&max_pc_addr) {
                             Ordering::Less => (),
-                            Ordering::Greater => unreachable!(),
+                            Ordering::Equal | Ordering::Greater => break,
                         };
 
                         let s = ss.get(pc_addr).unwrap();
 
                         let control = interp_s(s, &mut reg_env, &mut addr_env);
                         match control {
-                            Control::next => pc_addr += 1,
+                            Control::next => pc_addr += 1usize,
                             Control::jump {
                                 pc_addr: next_pc_addr,
                             } => pc_addr = next_pc_addr,
@@ -77,45 +77,37 @@ impl cpsc411::Interpret for ParenX64Rt {
                 self::S::set_addr_trg { addr, trg } => {
                     let value = get_from_trg(trg, reg_env);
                     addr_env.insert(addr.clone(), value);
-
                     Control::next
                 },
                 self::S::set_reg_triv { reg, triv } => {
                     let value = get_from_triv(triv, reg_env);
                     reg_env.insert(*reg, value);
-
                     Control::next
                 },
                 self::S::set_reg_loc { reg, loc } => {
                     let value = get_from_loc(loc, reg_env, addr_env);
                     reg_env.insert(*reg, value);
-
                     Control::next
                 },
                 self::S::set_reg_binop_reg_int32 { reg, binop, int32 } => {
                     let value1 = get_from_reg(reg, reg_env);
                     let value2 = *int32 as i64;
-
                     let value = bin_operate(binop, value1, value2);
 
                     reg_env.insert(*reg, value);
-
                     Control::next
                 },
                 self::S::set_reg_binop_reg_loc { reg, binop, loc } => {
                     let value1 = get_from_reg(reg, reg_env);
                     let value2 = get_from_loc(loc, reg_env, addr_env);
-
                     let value = bin_operate(binop, value1, value2);
 
                     reg_env.insert(*reg, value);
-
                     Control::next
                 },
-                self::S::jump_trg { trg } => {
+                self::S::jump_trg(trg) => {
                     let value: usize =
                         get_from_trg(trg, reg_env).try_into().unwrap();
-
                     Control::jump { pc_addr: value }
                 },
                 self::S::compare_reg_opand_jump_if {
@@ -144,15 +136,15 @@ impl cpsc411::Interpret for ParenX64Rt {
             addr_env: &AddrEnv,
         ) -> i64 {
             match loc {
-                self::Loc::addr { addr } => get_from_addr(addr, addr_env),
-                self::Loc::reg { reg } => get_from_reg(reg, reg_env),
+                self::Loc::addr(addr) => get_from_addr(addr, addr_env),
+                self::Loc::reg(reg) => get_from_reg(reg, reg_env),
             }
         }
 
         fn get_from_trg(trg: &self::Trg, reg_env: &RegEnv) -> i64 {
             match trg {
-                self::Trg::pc_addr { pc_addr } => *pc_addr as i64,
-                self::Trg::reg { reg } => get_from_reg(reg, reg_env),
+                self::Trg::pc_addr(pc_addr) => *pc_addr as i64,
+                self::Trg::reg(reg) => get_from_reg(reg, reg_env),
             }
         }
 
@@ -166,15 +158,15 @@ impl cpsc411::Interpret for ParenX64Rt {
 
         fn get_from_triv(triv: &self::Triv, reg_env: &RegEnv) -> i64 {
             match triv {
-                self::Triv::int64 { int64 } => *int64,
-                self::Triv::trg { trg } => get_from_trg(trg, reg_env),
+                self::Triv::int64(int64) => *int64,
+                self::Triv::trg(trg) => get_from_trg(trg, reg_env),
             }
         }
 
         fn get_from_opand(opand: &self::Opand, reg_env: &RegEnv) -> i64 {
             match opand {
-                self::Opand::int64 { int64 } => *int64,
-                self::Opand::reg { reg } => get_from_reg(reg, reg_env),
+                self::Opand::int64(int64) => *int64,
+                self::Opand::reg(reg) => get_from_reg(reg, reg_env),
             }
         }
 

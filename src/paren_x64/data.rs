@@ -2,7 +2,7 @@ use crate::cpsc411;
 
 #[derive(Clone)]
 pub enum P {
-    begin { ss: Vec<S> },
+    begin(Vec<S>),
 }
 
 #[derive(Clone)]
@@ -37,9 +37,7 @@ pub enum S {
         label: cpsc411::Label,
         s: Box<Self>,
     },
-    jump_trg {
-        trg: Trg,
-    },
+    jump_trg(Trg),
     compare_reg_opand_jump_if {
         reg: cpsc411::Reg,
         opand: Opand,
@@ -53,14 +51,14 @@ pub type Loc = super::target::Loc;
 
 #[derive(Clone)]
 pub enum Triv {
-    trg { trg: Trg },
-    int64 { int64: i64 },
+    trg(Trg),
+    int64(i64),
 }
 
 pub type Opand = super::target::Opand;
 
 #[derive(Debug, Clone)]
 pub enum Trg {
-    reg { reg: cpsc411::Reg },
-    label { label: cpsc411::Label },
+    reg(cpsc411::Reg),
+    label(cpsc411::Label),
 }
