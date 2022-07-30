@@ -8,15 +8,8 @@ use std::collections::HashMap;
 pub use self::data::*;
 use crate::cpsc411;
 
-type RegEnv = HashMap<cpsc411::Reg, i64>;
-type AddrEnv = HashMap<cpsc411::Addr, i64>;
+pub struct ParenX64Rt(pub self::P);
 
-pub struct ParenX64Rt {
-    pub p: self::P,
-}
-
-/// InterpLoop: ParenX64Rt -> i64
-///
 /// ### Purpose:
 /// Interpret the ParenX64Rt program as a value, returning the final value
 /// of rax.
@@ -24,13 +17,17 @@ impl cpsc411::Interpret for ParenX64Rt {
     type Output = i64;
 
     fn interpret(self) -> Self::Output {
+        type RegEnv = HashMap<cpsc411::Reg, i64>;
+
+        type AddrEnv = HashMap<cpsc411::Addr, i64>;
+
         enum Control {
             next,
             jump { pc_addr: cpsc411::PcAddr },
             // halt,
         }
 
-        let Self { p } = self;
+        let Self(p) = self;
 
         fn interp_p(p: self::P) -> i64 {
             let mut reg_env = RegEnv::default();

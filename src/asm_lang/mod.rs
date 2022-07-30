@@ -16,8 +16,6 @@ pub struct AsmLang {
 }
 
 impl AsmLang {
-    /// UncoverLocals: Self -> Self/Locals
-    ///
     /// ### Purpose:
     /// Compiles Asm-lang v2 to Asm-lang v2/locals, analysing which abstract
     /// locations are used in the program and decorating the program with the
@@ -104,8 +102,6 @@ impl AsmLang {
         Self { p }
     }
 
-    /// AssignFvars: Self/Locals -> Self/Assignments
-    ///
     /// ### Purpose:
     /// Compiles Asm-lang v2/locals to Asm-lang v2/assignments, by assigning
     /// each abstract location from the locals info field to a fresh frame
@@ -160,8 +156,6 @@ impl AsmLang {
         Self { p }
     }
 
-    /// UndeadAnalysis: Self/Locals -> Self/Undead
-    ///
     /// ### Purpose:
     /// Performs undeadness analysis, decorating the program with undead-set
     /// tree. Only the info field of the program is modified.
@@ -295,8 +289,6 @@ impl AsmLang {
         Self { p }
     }
 
-    /// ConfictAnalysis: Self/Undead -> Self/Conflicts
-    ///
     /// ### Purpose:
     /// Decorates a program with its conflict graph.
     fn conflict_analysis(self) -> Self {
@@ -410,8 +402,6 @@ impl AsmLang {
         Self { p }
     }
 
-    /// AssignRegisters: Self/Conflicts -> Self/Assignments
-    ///
     /// ### Purpose:
     /// Performs graph-colouring register allocation. The pass attempts to fit
     /// each of the abstract location declared in the locals set into a
@@ -545,8 +535,6 @@ impl AsmLang {
         Self { p }
     }
 
-    /// ReplaceLocations: Self/Assignments -> NestedAsmLang
-    ///
     /// ### Purpose:
     /// Compiles Asm-lang v2/assignments to Nested-asm-lang v2, replaced each
     /// abstract location with its assigned physical location from the
@@ -641,8 +629,6 @@ impl AsmLang {
         todo!()
     }
 
-    /// AssignHomes: AsmLang -> NestedAsmLang
-    ///
     /// ### Purpose:
     /// Compiles Asm-lang v2 to Nested-asm-lang v2, replacing each abstract
     /// location with a physical location.
@@ -650,8 +636,6 @@ impl AsmLang {
         self.uncover_locals().assign_fvars().replace_locations()
     }
 
-    /// AssignHomesOpt: AsmLang -> NestedAsmLang
-    ///
     /// ### Purpose:
     /// Compiles Asm-lang v2 to Nested-asm-lang v2, replacing each abstract
     /// location with a physical location. This version performs graph-colouring
@@ -665,8 +649,6 @@ impl AsmLang {
     }
 }
 
-/// Compile: AsmLang -> ParenX64
-///
 /// ### Purpose:
 /// Compiles the AsmLang program into a ParenX64 program.
 impl Compile for AsmLang {

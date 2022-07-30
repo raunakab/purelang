@@ -4,7 +4,7 @@ use crate::cpsc411;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum P {
-    module { tail: Tail },
+    module(Tail),
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -16,9 +16,7 @@ pub enum Pred {
     },
     r#true,
     r#false,
-    not {
-        pred: Box<Self>,
-    },
+    not(Box<Self>),
     r#let {
         bindings: Bindings,
         pred: Box<Self>,
@@ -32,9 +30,7 @@ pub enum Pred {
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Tail {
-    value {
-        value: Value,
-    },
+    value(Value),
     r#let {
         bindings: HashMap<Name, Value>,
         tail: Box<Self>,
@@ -48,9 +44,7 @@ pub enum Tail {
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Value {
-    triv {
-        triv: Triv,
-    },
+    triv(Triv),
     binop_triv_triv {
         binop: cpsc411::Binop,
         triv1: Triv,
@@ -69,8 +63,8 @@ pub enum Value {
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Triv {
-    int64 { int64: i64 },
-    name { name: Name },
+    int64(i64),
+    name(Name),
 }
 
 pub type Name = String;

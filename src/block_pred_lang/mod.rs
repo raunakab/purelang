@@ -9,8 +9,6 @@ use crate::block_asm_lang as target;
 pub struct BlockPredLang(pub self::P);
 
 impl BlockPredLang {
-    /// ResolvePredicates: BlockPredLang -> BlockAsmLang
-    ///
     /// ### Purpose:
     /// Compile the Block-pred-lang v4 to Block-asm-lang v4 by manipulating the
     /// branches of if statements to resolve branches.

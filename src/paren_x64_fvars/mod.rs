@@ -9,8 +9,6 @@ use crate::paren_x64 as target;
 pub struct ParenX64Fvars(pub self::P);
 
 impl ParenX64Fvars {
-    /// ImplementFvars: ParenX64Fvars -> ParenX64
-    ///
     /// ### Purpose:
     /// Compiles the Paren-x64-fvars v2 to Paren-x64 v2 by reifying fvars
     /// into displacement mode operands. The pass should use

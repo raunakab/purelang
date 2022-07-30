@@ -6,14 +6,12 @@ pub use self::data::*;
 use crate::cpsc411;
 use crate::imp_cmf_lang as target;
 
-#[derive(Debug, PartialEq, Eq)]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub struct ImpMfLang {
     pub p: self::P,
 }
 
 impl ImpMfLang {
-    /// NormalizeBind: ImpMfLang -> ImpCmfLang
-    ///
     /// ### Purpose:
     /// Compiles Imp-mf-lang v3 to Imp-cmf-lang v3, pushing set! under begin so
     /// that the right-hand-side of each set! is simple value-producing

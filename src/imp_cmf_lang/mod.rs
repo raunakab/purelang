@@ -12,8 +12,6 @@ pub struct ImpCmfLang {
 }
 
 impl ImpCmfLang {
-    /// SelectInstructions: ImpCmfLang -> AsmLang
-    ///
     /// ### Purpose:
     /// Compiles Imp-cmf-lang v3 to Asm-lang v2, selecting appropriate sequences
     /// of abstract assembly instructions to implement the operations of the

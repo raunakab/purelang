@@ -8,8 +8,6 @@ use crate::para_asm_lang as target;
 pub struct BlockAsmLang(pub self::P);
 
 impl BlockAsmLang {
-    /// FlattenProgram: BlockAsmLang -> ParaAsmLang
-    ///
     /// ### Purpose:
     /// Compile Block-asm-lang v4 to Para-asm-lang v4 by flattening basic blocks
     /// into labeled instructions.

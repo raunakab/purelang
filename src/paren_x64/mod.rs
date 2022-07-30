@@ -13,8 +13,6 @@ use crate::paren_x64_rt as target;
 pub struct ParenX64(pub self::P);
 
 impl ParenX64 {
-    /// CheckLabels: ParenX64 -> Result<ParenX64, String>
-    ///
     /// ### Purpose:
     /// Ensure all labels are unique and all jumps reference an existing label.
     fn check_labels(self) -> Result<Self, String> {
@@ -100,8 +98,6 @@ impl ParenX64 {
         Ok(self)
     }
 
-    /// GenerateX64: ParenX64 -> String
-    ///
     /// ### Purpose:
     /// Generate X64 source code in string form.
     pub fn generate_x64(self) -> String {
@@ -240,8 +236,6 @@ impl ParenX64 {
         generate_p(&p)
     }
 
-    /// LinkParenX64: ParenX64 -> ParenX64Rt
-    ///
     /// ### Purpose:
     /// Compiles Paren-x64 v4 to Paren-x64-rt v4 by resolving all labels to
     /// their position in the instruction sequence.
@@ -364,12 +358,11 @@ impl ParenX64 {
         }
 
         let p = link_p(p);
-        target::ParenX64Rt { p }
+
+        target::ParenX64Rt(p)
     }
 }
 
-/// Check: ParenX64 -> Result<ParenX64, String>
-///
 /// ### Purpose:
 /// Check ParenX64 to make sure it's a valid ParenX64 program.
 /// - Need to ensure all labels are unique.
@@ -385,8 +378,6 @@ impl cpsc411::Check for ParenX64 {
     }
 }
 
-/// Interpret: ParenX64 -> i64
-///
 /// ### Purpose:
 /// Interpret ParenX64 source code into an i64.
 impl cpsc411::Interpret for ParenX64 {

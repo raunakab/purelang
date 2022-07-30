@@ -9,8 +9,6 @@ use crate::paren_x64_fvars as target;
 pub struct ParaAsmLang(pub self::P);
 
 impl ParaAsmLang {
-    /// PatchInstructions: ParaAsmLang -> ParenX64Fvars
-    ///
     /// ### Purpose:
     /// Compiles Para-asm-lang v2 to Paren-x64-fvars v2 by patching instructions
     /// that have no x64 analogue into a sequence of instructions. The
