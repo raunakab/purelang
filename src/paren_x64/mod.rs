@@ -10,6 +10,7 @@ use crate::cpsc411;
 use crate::paren_x64_rt as target;
 
 #[derive(Clone)]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub struct ParenX64(pub self::P);
 
 impl ParenX64 {

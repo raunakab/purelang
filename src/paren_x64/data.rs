@@ -1,11 +1,13 @@
 use crate::cpsc411;
 
 #[derive(Clone)]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum P {
     begin(Vec<S>),
 }
 
 #[derive(Clone)]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum S {
     set_addr_int32 {
         addr: cpsc411::Addr,
@@ -50,6 +52,7 @@ pub enum S {
 pub type Loc = super::target::Loc;
 
 #[derive(Clone)]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum Triv {
     trg(Trg),
     int64(i64),
@@ -58,6 +61,7 @@ pub enum Triv {
 pub type Opand = super::target::Opand;
 
 #[derive(Debug, Clone)]
+#[cfg_attr(test, derive(PartialEq, Eq))]
 pub enum Trg {
     reg(cpsc411::Reg),
     label(cpsc411::Label),

@@ -46,6 +46,7 @@ pub enum S {
 }
 
 #[derive(Clone, Hash, PartialEq, Eq)]
+#[cfg_attr(test, derive(Debug))]
 pub enum Loc {
     reg(cpsc411::Reg),
     addr(cpsc411::Addr),
@@ -58,6 +59,7 @@ pub enum Triv {
 }
 
 #[derive(Clone)]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum Opand {
     int64(i64),
     reg(cpsc411::Reg),

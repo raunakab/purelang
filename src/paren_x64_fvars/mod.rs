@@ -6,6 +6,7 @@ pub use self::data::*;
 use crate::cpsc411;
 use crate::paren_x64 as target;
 
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub struct ParenX64Fvars(pub self::P);
 
 impl ParenX64Fvars {
@@ -79,7 +80,7 @@ impl ParenX64Fvars {
         }
 
         fn implement_fvar(
-            cpsc411::Fvar { index }: cpsc411::Fvar,
+            cpsc411::Fvar(index): cpsc411::Fvar,
         ) -> cpsc411::Addr {
             let fbp = cpsc411::Reg::current_frame_base_pointer();
 

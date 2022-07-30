@@ -10,7 +10,8 @@ use crate::cpsc411;
 use crate::cpsc411::Compile;
 use crate::nested_asm_lang as target;
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(PartialEq, Eq)]
+#[cfg_attr(test, derive(Debug))]
 pub struct AsmLang {
     pub p: self::P,
 }

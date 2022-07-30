@@ -144,6 +144,7 @@ impl Reg {
 }
 
 #[derive(Clone, Hash, PartialEq, Eq)]
+#[cfg_attr(test, derive(Debug))]
 pub struct Addr {
     pub fbp: Reg,
     pub disp_offset: usize,
@@ -210,14 +211,13 @@ impl Label {
 }
 
 #[derive(Debug, Hash, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Fvar {
-    pub index: usize,
-}
+pub struct Fvar(pub usize);
 
 impl Fvar {
     pub fn fresh() -> Self {
         let index = fresh_index(&FVAR_INDEX);
-        Self { index }
+
+        Self(index)
     }
 }
 

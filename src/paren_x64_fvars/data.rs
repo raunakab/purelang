@@ -1,9 +1,11 @@
 use crate::cpsc411;
 
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum P {
     begin(Vec<S>),
 }
 
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum S {
     set_fvar_int32 {
         fvar: cpsc411::Fvar,
@@ -45,7 +47,8 @@ pub enum S {
     nop,
 }
 
-#[derive(Debug, Clone, Hash, PartialEq, Eq)]
+#[derive(Clone, Hash, PartialEq, Eq)]
+#[cfg_attr(test, derive(Debug))]
 pub enum Loc {
     reg(cpsc411::Reg),
     fvar(cpsc411::Fvar),

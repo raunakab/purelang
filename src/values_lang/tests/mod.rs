@@ -7,11 +7,13 @@ use crate::values_unique_lang as target;
 #[test]
 #[serial]
 fn book_example_1() {
-    let program = source::ValuesLang(source::P::module(source::Tail::value(source::Value::binop_triv_triv {
-        binop: cpsc411::Binop::plus,
-        triv1: source::Triv::int64(2),
-        triv2: source::Triv::int64(2),
-    })));
+    let program = source::ValuesLang(source::P::module(source::Tail::value(
+        source::Value::binop_triv_triv {
+            binop: cpsc411::Binop::plus,
+            triv1: source::Triv::int64(2),
+            triv2: source::Triv::int64(2),
+        },
+    )));
 
     let expected = target::ValuesUniqueLang {
         p: target::P::module {
@@ -36,10 +38,15 @@ fn book_example_1() {
 #[serial]
 fn book_example_2() {
     let program = source::ValuesLang(source::P::module(source::Tail::r#let {
-        bindings: vec![("x".into(), source::Value::triv(source::Triv::int64(5)))]
+        bindings: vec![(
+            "x".into(),
+            source::Value::triv(source::Triv::int64(5)),
+        )]
         .into_iter()
         .collect::<_>(),
-        tail: Box::new(source::Tail::value(source::Value::triv(source::Triv::name("x".into())))),
+        tail: Box::new(source::Tail::value(source::Value::triv(
+            source::Triv::name("x".into()),
+        ))),
     }));
 
     let aloc = cpsc411::Aloc::fresh();

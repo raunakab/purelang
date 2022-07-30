@@ -1,6 +1,7 @@
 use crate::cpsc411;
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(PartialEq, Eq)]
+#[cfg_attr(test, derive(Debug))]
 pub enum P {
     module {
         info: cpsc411::Info<super::target::Loc>,
@@ -8,7 +9,8 @@ pub enum P {
     },
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(PartialEq, Eq)]
+#[cfg_attr(test, derive(Debug))]
 pub enum Tail {
     halt {
         triv: Triv,
@@ -19,7 +21,8 @@ pub enum Tail {
     },
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(PartialEq, Eq)]
+#[cfg_attr(test, derive(Debug))]
 pub enum Effect {
     set_aloc_triv {
         aloc: cpsc411::Aloc,
@@ -35,7 +38,8 @@ pub enum Effect {
     },
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(PartialEq, Eq)]
+#[cfg_attr(test, derive(Debug))]
 pub enum Triv {
     int64 { int64: i64 },
     aloc { aloc: cpsc411::Aloc },
