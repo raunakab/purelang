@@ -1,9 +1,11 @@
 use crate::cpsc411;
 
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum P {
     begin(Vec<S>),
 }
 
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum S {
     halt(Opand),
     set_loc_triv {
@@ -29,8 +31,6 @@ pub enum S {
     nop,
 }
 
-pub type Loc = super::target::Loc;
-
 #[derive(Clone)]
 #[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum Triv {
@@ -51,3 +51,5 @@ pub enum Opand {
     int64(i64),
     loc(Loc),
 }
+
+pub type Loc = super::target::Loc;

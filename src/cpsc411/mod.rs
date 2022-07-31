@@ -342,16 +342,6 @@ impl Graph {
     }
 }
 
-pub trait Check: Sized {
-    fn check(self) -> Result<Self, String>;
-}
-
-pub trait Interpret {
-    type Output;
-
-    fn interpret(self) -> Self::Output;
-}
-
 pub trait Compile {
     fn compile(self, opt_level: crate::OptLevels) -> paren_x64::ParenX64;
 }

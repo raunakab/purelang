@@ -6,13 +6,16 @@ pub use self::data::*;
 use crate::cpsc411;
 use crate::paren_x64_fvars as target;
 
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub struct ParaAsmLang(pub self::P);
 
 impl ParaAsmLang {
     /// ### Purpose:
     /// Compiles Para-asm-lang v2 to Paren-x64-fvars v2 by patching instructions
-    /// that have no x64 analogue into a sequence of instructions. The
-    /// implementation should use auxiliary registers from
+    /// that have no x64 analogue into a sequence of instructions.
+    ///
+    /// ### Notes:
+    /// The implementation should use auxiliary registers from
     /// current-patch-instructions-registers when generating instruction
     /// sequences, and current-return-value-register for compiling halt.
     pub fn patch_instructions(self) -> target::ParenX64Fvars {
@@ -46,49 +49,22 @@ impl ParaAsmLang {
                 self::S::halt(opand) => {
                     let return_reg = cpsc411::Reg::current_return_reg();
 
-                    match opand {
-                        self::Opand::int64(int64) => {
-                            let instr1 = target::S::set_reg_triv {
-                                reg: return_reg,
-                                triv: target::Triv::int64(int64),
-                            };
-
-                            let instr2 = target::S::jump(target::Trg::label(
-                                cpsc411::Label::halt_label(),
-                            ));
-
-                            vec![instr1, instr2]
+                    let instr1 = match opand {
+                        self::Opand::int64(int64) => target::S::set_reg_triv {
+                            reg: return_reg,
+                            triv: target::Triv::int64(int64),
                         },
-                        self::Opand::loc(loc) => match loc {
-                            self::Loc::reg(reg) => {
-                                let instr1 = target::S::set_reg_loc {
-                                    reg: return_reg,
-                                    loc: target::Loc::reg(reg),
-                                };
-
-                                let instr2 =
-                                    target::S::jump(target::Trg::label(
-                                        cpsc411::Label::halt_label(),
-                                    ));
-
-                                vec![instr1, instr2]
-                            },
-
-                            self::Loc::fvar(fvar) => {
-                                let instr1 = target::S::set_reg_loc {
-                                    reg: return_reg,
-                                    loc: target::Loc::fvar(fvar),
-                                };
-
-                                let instr2 =
-                                    target::S::jump(target::Trg::label(
-                                        cpsc411::Label::halt_label(),
-                                    ));
-
-                                vec![instr1, instr2]
-                            },
+                        self::Opand::loc(loc) => target::S::set_reg_loc {
+                            reg: return_reg,
+                            loc,
                         },
-                    }
+                    };
+
+                    let instr2 = target::S::jump(target::Trg::label(
+                        cpsc411::Label::halt_label(),
+                    ));
+
+                    vec![instr1, instr2]
                 },
 
                 self::S::set_loc_triv { loc, triv } => match (loc, triv) {
@@ -425,8 +401,7 @@ impl ParaAsmLang {
                         self::Trg::loc(loc),
                     ) => match loc {
                         self::Loc::reg(reg) => {
-                            let label =
-                                cpsc411::Label::new_with_name("neg-jmp");
+                            let label = generate_neg_jump_label();
 
                             let instr1 = target::S::compare_reg_opand_jump_if {
                                 reg,
@@ -448,8 +423,7 @@ impl ParaAsmLang {
                             let (aux_reg, _) =
                                 cpsc411::Reg::current_auxiliary_registers();
 
-                            let label =
-                                cpsc411::Label::new_with_name("neg-jmp");
+                            let label = generate_neg_jump_label();
 
                             let instr1 = target::S::compare_reg_opand_jump_if {
                                 reg,
@@ -514,8 +488,7 @@ impl ParaAsmLang {
                         self::Trg::loc(loc2),
                     ) => match (loc, loc2) {
                         (self::Loc::reg(reg2), self::Loc::reg(reg3)) => {
-                            let label =
-                                cpsc411::Label::new_with_name("neg-jmp");
+                            let label = generate_neg_jump_label();
 
                             let instr1 = target::S::compare_reg_opand_jump_if {
                                 reg,
@@ -538,8 +511,7 @@ impl ParaAsmLang {
                             let (aux_reg, _) =
                                 cpsc411::Reg::current_auxiliary_registers();
 
-                            let label =
-                                cpsc411::Label::new_with_name("neg-jmp");
+                            let label = generate_neg_jump_label();
 
                             let instr1 = target::S::compare_reg_opand_jump_if {
                                 reg,
@@ -567,8 +539,7 @@ impl ParaAsmLang {
                             let (aux_reg, _) =
                                 cpsc411::Reg::current_auxiliary_registers();
 
-                            let label =
-                                cpsc411::Label::new_with_name("neg-jmp");
+                            let label = generate_neg_jump_label();
 
                             let instr1 = target::S::set_reg_loc {
                                 reg: aux_reg,
@@ -596,8 +567,7 @@ impl ParaAsmLang {
                             let (aux_reg, aux_reg_2) =
                                 cpsc411::Reg::current_auxiliary_registers();
 
-                            let label =
-                                cpsc411::Label::new_with_name("neg-jmp");
+                            let label = generate_neg_jump_label();
 
                             let instr1 = target::S::set_reg_loc {
                                 reg: aux_reg,
@@ -659,8 +629,7 @@ impl ParaAsmLang {
                             let (aux_reg, _) =
                                 cpsc411::Reg::current_auxiliary_registers();
 
-                            let label =
-                                cpsc411::Label::new_with_name("neg-jmp");
+                            let label = generate_neg_jump_label();
 
                             let instr1 = target::S::set_reg_loc {
                                 reg: aux_reg,
@@ -687,8 +656,7 @@ impl ParaAsmLang {
                             let (aux_reg, aux_reg_2) =
                                 cpsc411::Reg::current_auxiliary_registers();
 
-                            let label =
-                                cpsc411::Label::new_with_name("neg-jmp");
+                            let label = generate_neg_jump_label();
 
                             let instr1 = target::S::set_reg_loc {
                                 reg: aux_reg,
@@ -774,8 +742,7 @@ impl ParaAsmLang {
                             let (aux_reg, _) =
                                 cpsc411::Reg::current_auxiliary_registers();
 
-                            let label =
-                                cpsc411::Label::new_with_name("neg-jmp");
+                            let label = generate_neg_jump_label();
 
                             let instr1 = target::S::set_reg_loc {
                                 reg: aux_reg,
@@ -803,8 +770,7 @@ impl ParaAsmLang {
                             let (aux_reg, aux_reg_2) =
                                 cpsc411::Reg::current_auxiliary_registers();
 
-                            let label =
-                                cpsc411::Label::new_with_name("neg-jmp");
+                            let label = generate_neg_jump_label();
 
                             let instr1 = target::S::set_reg_loc {
                                 reg: aux_reg,
@@ -837,8 +803,7 @@ impl ParaAsmLang {
                             let (aux_reg, aux_reg_2) =
                                 cpsc411::Reg::current_auxiliary_registers();
 
-                            let label =
-                                cpsc411::Label::new_with_name("neg-jmp");
+                            let label = generate_neg_jump_label();
 
                             let instr1 = target::S::set_reg_loc {
                                 reg: aux_reg,
@@ -871,8 +836,7 @@ impl ParaAsmLang {
                             let (aux_reg, aux_reg_2) =
                                 cpsc411::Reg::current_auxiliary_registers();
 
-                            let label =
-                                cpsc411::Label::new_with_name("neg-jmp");
+                            let label = generate_neg_jump_label();
 
                             let instr1 = target::S::set_reg_loc {
                                 reg: aux_reg,
@@ -921,4 +885,8 @@ impl ParaAsmLang {
 
         target::ParenX64Fvars(p)
     }
+}
+
+fn generate_neg_jump_label() -> cpsc411::Label {
+    cpsc411::Label::new_with_name("neg-jump")
 }

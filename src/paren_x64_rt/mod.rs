@@ -10,13 +10,11 @@ use crate::cpsc411;
 
 pub struct ParenX64Rt(pub self::P);
 
-/// ### Purpose:
-/// Interpret the ParenX64Rt program as a value, returning the final value
-/// of rax.
-impl cpsc411::Interpret for ParenX64Rt {
-    type Output = i64;
-
-    fn interpret(self) -> Self::Output {
+impl ParenX64Rt {
+    /// ### Purpose:
+    /// Interpret the ParenX64Rt program as a value, returning the final value
+    /// of rax.
+    pub fn interp_loop(self) -> i64 {
         type RegEnv = HashMap<cpsc411::Reg, i64>;
 
         type AddrEnv = HashMap<cpsc411::Addr, i64>;
@@ -24,14 +22,15 @@ impl cpsc411::Interpret for ParenX64Rt {
         enum Control {
             next,
             jump { pc_addr: cpsc411::PcAddr },
-            // halt,
         }
 
         let Self(p) = self;
 
         fn interp_p(p: self::P) -> i64 {
             let mut reg_env = RegEnv::default();
+
             let mut addr_env = AddrEnv::default();
+
             let mut pc_addr = cpsc411::PcAddr::default();
 
             match p {

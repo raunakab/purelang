@@ -3,7 +3,6 @@ use serial_test::serial;
 use crate::asm_lang as source;
 use crate::cpsc411;
 use crate::cpsc411::Compile;
-use crate::cpsc411::Interpret;
 
 #[test]
 #[serial]
@@ -19,7 +18,7 @@ fn basic() {
     .compile(crate::OptLevels::O1);
 
     let x64 = ir.clone().generate_x64();
-    let result = ir.interpret();
+    let result = ir.link_paren_x64().interp_loop();
 
     assert_eq!(
         x64,
@@ -53,7 +52,7 @@ fn one_basic_effect() {
     .compile(crate::OptLevels::O1);
 
     let x64 = ir.clone().generate_x64();
-    let result = ir.interpret();
+    let result = ir.link_paren_x64().interp_loop();
 
     assert_eq!(
         x64,
@@ -94,7 +93,7 @@ fn multiple_basic_effects() {
     .compile(crate::OptLevels::O1);
 
     let x64 = ir.clone().generate_x64();
-    let result = ir.interpret();
+    let result = ir.link_paren_x64().interp_loop();
 
     assert_eq!(
         x64,
@@ -143,7 +142,7 @@ fn one_complex_effect() {
     .compile(crate::OptLevels::O1);
 
     let x64 = ir.clone().generate_x64();
-    let result = ir.interpret();
+    let result = ir.link_paren_x64().interp_loop();
 
     assert_eq!(
         x64,
@@ -198,7 +197,7 @@ fn one_complex_effect_with_addition() {
     .compile(crate::OptLevels::O1);
 
     let x64 = ir.clone().generate_x64();
-    let result = ir.interpret();
+    let result = ir.link_paren_x64().interp_loop();
 
     assert_eq!(
         x64,
@@ -231,7 +230,7 @@ fn basic_opt() {
     }
     .compile(crate::OptLevels::O3);
 
-    let result = ir.interpret();
+    let result = ir.link_paren_x64().interp_loop();
 
     assert_eq!(result, 0);
 
@@ -275,7 +274,7 @@ fn one_complex_effect_with_addition_opt() {
     }
     .compile(crate::OptLevels::O2);
 
-    let result = ir.interpret();
+    let result = ir.link_paren_x64().interp_loop();
 
     assert_eq!(result, 30);
 

@@ -49,8 +49,6 @@ pub enum S {
     nop,
 }
 
-pub type Loc = super::target::Loc;
-
 #[derive(Clone)]
 #[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum Triv {
@@ -58,11 +56,13 @@ pub enum Triv {
     int64(i64),
 }
 
-pub type Opand = super::target::Opand;
-
 #[derive(Debug, Clone)]
 #[cfg_attr(test, derive(PartialEq, Eq))]
 pub enum Trg {
     reg(cpsc411::Reg),
     label(cpsc411::Label),
 }
+
+pub type Loc = super::target::Loc;
+
+pub type Opand = super::target::Opand;

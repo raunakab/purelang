@@ -2,7 +2,6 @@ use serial_test::serial;
 
 use crate::cpsc411;
 use crate::cpsc411::Compile;
-use crate::cpsc411::Interpret;
 use crate::values_lang as source;
 
 #[test]
@@ -14,7 +13,7 @@ fn basic() {
     .compile(crate::OptLevels::O1);
 
     let x64 = ir.clone().generate_x64();
-    let result = ir.interpret();
+    let result = ir.link_paren_x64().interp_loop();
 
     assert_eq!(
         x64,
@@ -47,7 +46,7 @@ fn basic_with_let_bindings() {
     .compile(crate::OptLevels::O1);
 
     let x64 = ir.clone().generate_x64();
-    let result = ir.interpret();
+    let result = ir.link_paren_x64().interp_loop();
 
     println!("\n{}\n", x64);
 
@@ -95,7 +94,7 @@ fn book_example_4() {
     let paren_x64 = program.compile(crate::OptLevels::O3);
 
     let x64 = paren_x64.clone().generate_x64();
-    let result = paren_x64.interpret();
+    let result = paren_x64.link_paren_x64().interp_loop();
 
     assert_eq!(result, 4);
 
@@ -134,7 +133,7 @@ fn book_example_5() {
     let paren_x64 = program.compile(crate::OptLevels::O3);
 
     let x64 = paren_x64.clone().generate_x64();
-    let result = paren_x64.interpret();
+    let result = paren_x64.link_paren_x64().interp_loop();
 
     assert_eq!(result, 7);
 

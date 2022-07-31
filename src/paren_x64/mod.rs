@@ -16,7 +16,7 @@ pub struct ParenX64(pub self::P);
 impl ParenX64 {
     /// ### Purpose:
     /// Ensure all labels are unique and all jumps reference an existing label.
-    fn check_labels(self) -> Result<Self, String> {
+    pub fn check_labels(self) -> Result<Self, String> {
         type LabelStore = HashSet<cpsc411::Label>;
 
         let Self(p) = &self;
@@ -51,6 +51,7 @@ impl ParenX64 {
                                 "The label, '{:?}', already exists.",
                                 label
                             );
+
                             Err(error_msg)
                         },
                     }
@@ -90,6 +91,7 @@ impl ParenX64 {
                 false => {
                     let error_msg =
                         format!("The label, '{:?}', was not found.", label);
+
                     Err(error_msg)
                 },
             }
@@ -106,12 +108,17 @@ impl ParenX64 {
 
         fn generate_p(p: &self::P) -> String {
             match p {
-                self::P::begin(ref ss) => {
-                    ss.iter().fold(String::new(), |acc, s| {
-                        let s_as_string = generate_s(s);
-                        format!("{}\n{}", acc, s_as_string)
-                    })
-                },
+                self::P::begin(ref ss) => ss.iter().enumerate().fold(
+                    String::new(),
+                    |acc, (index, s)| {
+                        let s = generate_s(s);
+
+                        match index {
+                            0 => s,
+                            _ => format!("{}\n{}", acc, s),
+                        }
+                    },
+                ),
             }
         }
 
@@ -119,41 +126,49 @@ impl ParenX64 {
             match s {
                 self::S::set_addr_int32 { addr, int32 } => {
                     let addr = generate_addr(addr);
-                    format!("mov {}, {}", addr, int32)
+
+                    format!("\tmov {}, {}", addr, int32)
                 },
                 self::S::set_addr_trg { addr, trg } => {
                     let addr = generate_addr(addr);
+
                     let trg = generate_trg(trg);
 
-                    format!("mov {}, {}", addr, trg)
+                    format!("\tmov {}, {}", addr, trg)
                 },
                 self::S::set_reg_loc { reg, loc } => {
                     let loc = generate_loc(loc);
-                    format!("mov {:?}, {}", reg, loc)
+
+                    format!("\tmov {:?}, {}", reg, loc)
                 },
                 self::S::set_reg_triv { reg, triv } => {
                     let triv = generate_triv(triv);
-                    format!("mov {:?}, {}", reg, triv)
+
+                    format!("\tmov {:?}, {}", reg, triv)
                 },
                 self::S::set_reg_binop_reg_int32 { reg, binop, int32 } => {
                     let binop = generate_binop(binop);
-                    format!("{} {:?}, {}", binop, reg, int32)
+
+                    format!("\t{} {:?}, {}", binop, reg, int32)
                 },
                 self::S::set_reg_binop_reg_loc { reg, binop, loc } => {
                     let binop = generate_binop(binop);
+
                     let loc = generate_loc(loc);
 
-                    format!("{} {:?}, {}", binop, reg, loc)
+                    format!("\t{} {:?}, {}", binop, reg, loc)
                 },
                 self::S::with_label { label, s } => {
                     let label = generate_label(label);
+
                     let s = generate_s(&s);
 
                     format!("{}:\n{}", label, s)
                 },
                 self::S::jump_trg(trg) => {
                     let trg = generate_trg(trg);
-                    format!("jmp {}", trg)
+
+                    format!("\tjmp {}", trg)
                 },
                 self::S::compare_reg_opand_jump_if {
                     reg,
@@ -162,11 +177,14 @@ impl ParenX64 {
                     label,
                 } => {
                     let opand = generate_opand(opand);
-                    let cmp_instr = format!("cmp {:?}, {}", reg, opand);
+
+                    let cmp_instr = format!("\tcmp {:?}, {}", reg, opand);
 
                     let relop = generate_relop(relop);
+
                     let label = generate_label(label);
-                    let jmp_instr = format!("{} {}", relop, label);
+
+                    let jmp_instr = format!("\t{} {}", relop, label);
 
                     format!("{}\n{}", cmp_instr, jmp_instr)
                 },
@@ -176,41 +194,45 @@ impl ParenX64 {
 
         fn generate_triv(triv: &self::Triv) -> String {
             match triv {
-                self::Triv::trg(trg) => format!("{:?}", trg),
-                self::Triv::int64(int64) => format!("{}", int64),
+                self::Triv::trg(trg) => generate_trg(trg),
+                self::Triv::int64(int64) => int64.to_string(),
             }
         }
 
-        fn generate_label(label: &cpsc411::Label) -> String {
-            let cpsc411::Label(label) = label.clone();
-
-            label
+        fn generate_label(cpsc411::Label(label): &cpsc411::Label) -> String {
+            label.clone()
         }
 
         fn generate_trg(trg: &self::Trg) -> String {
             match trg {
-                self::Trg::reg(reg) => format!("{:#?}", reg),
+                self::Trg::reg(reg) => generate_reg(reg),
                 self::Trg::label(label) => generate_label(label),
             }
+        }
+
+        fn generate_reg(reg: &cpsc411::Reg) -> String {
+            format!("{:#?}", reg)
         }
 
         fn generate_addr(
             cpsc411::Addr { fbp, disp_offset }: &cpsc411::Addr,
         ) -> String {
-            format!("QWORD [{:?} - {}]", fbp, disp_offset)
+            let fbp = generate_reg(fbp);
+
+            format!("QWORD [{} - {}]", fbp, disp_offset)
         }
 
         fn generate_opand(opand: &self::Opand) -> String {
             match opand {
-                self::Opand::int64(int64) => format!("{}", int64),
-                self::Opand::reg(reg) => format!("{:#?}", reg),
+                self::Opand::int64(int64) => int64.to_string(),
+                self::Opand::reg(reg) => generate_reg(reg),
             }
         }
 
         fn generate_loc(loc: &self::Loc) -> String {
             match loc {
                 self::Loc::addr(addr) => generate_addr(addr),
-                self::Loc::reg(reg) => format!("{:?}", reg),
+                self::Loc::reg(reg) => generate_reg(reg),
             }
         }
 
@@ -246,16 +268,21 @@ impl ParenX64 {
         let Self(p) = self;
 
         fn link_p(p: self::P) -> target::P {
-            let mut labels = LabelStore::default();
+            let label_store = LabelStore::default();
 
             match p {
                 self::P::begin(ss) => {
-                    ss.iter().enumerate().for_each(|(curr_index, s)| {
-                        resolve_labels(s, &mut labels, curr_index);
-                    });
+                    let label_store = ss.iter().enumerate().fold(
+                        label_store,
+                        |label_store, (index, s)| {
+                            resolve_labels(s, label_store, index)
+                        },
+                    );
 
-                    let ss =
-                        ss.into_iter().map(|s| link_s(s, &labels)).collect();
+                    let ss = ss
+                        .into_iter()
+                        .map(|s| link_s(s, &label_store))
+                        .collect();
 
                     target::P::begin(ss)
                 },
@@ -264,12 +291,13 @@ impl ParenX64 {
 
         fn resolve_labels(
             s: &self::S,
-            labels: &mut LabelStore,
+            mut label_store: LabelStore,
             curr_index: cpsc411::PcAddr,
-        ) {
+        ) -> LabelStore {
             match s {
                 self::S::with_label { label, .. } => {
-                    let prev_pc_addr = labels.insert(label.clone(), curr_index);
+                    let prev_pc_addr =
+                        label_store.insert(label.clone(), curr_index);
 
                     match prev_pc_addr {
                         Some(_) => {
@@ -277,10 +305,10 @@ impl ParenX64 {
 
                             panic!("The label, '{}', already exists.", label);
                         },
-                        None => (),
+                        None => label_store,
                     }
                 },
-                _ => (),
+                _ => label_store,
             }
         }
 
@@ -361,30 +389,5 @@ impl ParenX64 {
         let p = link_p(p);
 
         target::ParenX64Rt(p)
-    }
-}
-
-/// ### Purpose:
-/// Check ParenX64 to make sure it's a valid ParenX64 program.
-/// - Need to ensure all labels are unique.
-/// - Need to ensure all jumps reference an existing label.
-///
-/// ### Notes:
-/// In general, it cannot be checked that a register is initialized before
-/// usage. This is due to ParenX64 allowing for "control-flow", some of which
-/// may be dynamic and unable to be checked at compile-time.
-impl cpsc411::Check for ParenX64 {
-    fn check(self) -> Result<Self, String> {
-        self.check_labels()
-    }
-}
-
-/// ### Purpose:
-/// Interpret ParenX64 source code into an i64.
-impl cpsc411::Interpret for ParenX64 {
-    type Output = i64;
-
-    fn interpret(self) -> Self::Output {
-        self.link_paren_x64().interpret()
     }
 }
