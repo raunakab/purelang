@@ -1,8 +1,8 @@
 use serial_test::serial;
 
+use crate::imperative_abstractions::imp_cmf_lang as source;
 use crate::register_allocation::asm_pred_lang as target;
 use crate::utils;
-use crate::imperative_abstractions::imp_cmf_lang as source;
 
 #[test]
 #[serial]
@@ -17,7 +17,7 @@ fn book_example_1() {
 
     let tmp = utils::Aloc::fresh();
 
-    let expected = target::AsmLang(target::P::module {
+    let expected = target::AsmPredLang(target::P::module {
         info: utils::Info::default(),
         tail: target::Tail::begin {
             effects: vec![
@@ -58,7 +58,7 @@ fn book_example_2() {
         ))),
     }));
 
-    let expected = target::AsmLang(target::P::module {
+    let expected = target::AsmPredLang(target::P::module {
         info: utils::Info::default(),
         tail: target::Tail::begin {
             effects: vec![target::Effect::set_aloc_triv {
@@ -94,7 +94,7 @@ fn book_example_3() {
         ))),
     }));
 
-    let expected = target::AsmLang(target::P::module {
+    let expected = target::AsmPredLang(target::P::module {
         info: utils::Info::default(),
         tail: target::Tail::begin {
             effects: vec![
@@ -148,7 +148,7 @@ fn book_example_4() {
         index: 2,
     };
 
-    let expected = target::AsmLang(target::P::module {
+    let expected = target::AsmPredLang(target::P::module {
         info: utils::Info::default(),
         tail: target::Tail::begin {
             effects: vec![

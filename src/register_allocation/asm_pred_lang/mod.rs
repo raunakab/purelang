@@ -6,19 +6,19 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 
 pub use self::data::*;
-use crate::utils;
 use crate::structured_control_flow::nested_asm_lang as target;
+use crate::utils;
 
 #[derive(PartialEq, Eq)]
 #[cfg_attr(test, derive(Debug))]
-pub struct AsmLang(pub self::P);
+pub struct AsmPredLang(pub self::P);
 
-impl AsmLang {
+impl AsmPredLang {
     /// ### Purpose:
     /// Compiles Asm-lang v2 to Asm-lang v2/locals, analysing which abstract
     /// locations are used in the program and decorating the program with the
     /// set of variables in an info field.
-    fn uncover_locals(self) -> Self {
+    pub fn uncover_locals(self) -> Self {
         let Self(p) = self;
 
         fn uncover_p(p: self::P) -> self::P {
@@ -136,7 +136,7 @@ impl AsmLang {
     /// Compiles Asm-lang v2/locals to Asm-lang v2/assignments, by assigning
     /// each abstract location from the locals info field to a fresh frame
     /// variable.
-    fn assign_fvars(self) -> Self {
+    pub fn assign_fvars(self) -> Self {
         let Self(p) = self;
 
         fn assign_p(p: self::P) -> self::P {
@@ -175,7 +175,7 @@ impl AsmLang {
     /// ### Purpose:
     /// Performs undeadness analysis, decorating the program with undead-set
     /// tree. Only the info field of the program is modified.
-    fn undead_analysis(self) -> Self {
+    pub fn undead_analysis(self) -> Self {
         let Self(p) = self;
 
         fn undead_p(p: self::P) -> self::P {
@@ -357,7 +357,7 @@ impl AsmLang {
 
     /// ### Purpose:
     /// Decorates a program with its conflict graph.
-    fn conflict_analysis(self) -> Self {
+    pub fn conflict_analysis(self) -> Self {
         let Self(p) = self;
 
         fn conf_p(p: self::P) -> self::P {
@@ -514,7 +514,7 @@ impl AsmLang {
     /// each of the abstract location declared in the locals set into a
     /// register, and if one cannot be found, assigns it a frame variable
     /// instead.
-    fn assign_registers(self) -> Self {
+    pub fn assign_registers(self) -> Self {
         let Self(p) = self;
 
         fn get_assignable_registers_from_assignments(
@@ -630,7 +630,7 @@ impl AsmLang {
     /// Compiles Asm-lang v2/assignments to Nested-asm-lang v2, replaced each
     /// abstract location with its assigned physical location from the
     /// assignment info field.
-    fn replace_locations(self) -> target::NestedAsmLang {
+    pub fn replace_locations(self) -> target::NestedAsmLang {
         let Self(p) = self;
 
         fn replace_p(p: self::P) -> target::P {
@@ -783,24 +783,5 @@ impl AsmLang {
 
         let p = replace_p(p);
         target::NestedAsmLang(p)
-    }
-
-    /// ### Purpose:
-    /// Compiles Asm-lang v2 to Nested-asm-lang v2, replacing each abstract
-    /// location with a physical location.
-    pub fn assign_homes(self) -> target::NestedAsmLang {
-        self.uncover_locals().assign_fvars().replace_locations()
-    }
-
-    /// ### Purpose:
-    /// Compiles Asm-lang v2 to Nested-asm-lang v2, replacing each abstract
-    /// location with a physical location. This version performs graph-colouring
-    /// register allocation.
-    pub fn assign_homes_opt(self) -> target::NestedAsmLang {
-        self.uncover_locals()
-            .undead_analysis()
-            .conflict_analysis()
-            .assign_registers()
-            .replace_locations()
     }
 }

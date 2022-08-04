@@ -1,15 +1,15 @@
 use serial_test::serial;
 
-use crate::utils;
-use crate::imperative_abstractions::values_lang as source;
 use crate::compile;
+use crate::imperative_abstractions::values_lang as source;
+use crate::utils;
 
 #[test]
 #[serial]
 fn basic() {
-    let ir = compile(source::ValuesLang(source::P::module(source::Tail::value(
-        source::Value::triv(source::Triv::int64(9)),
-    ))));
+    let ir = compile(source::ValuesLang(source::P::module(
+        source::Tail::value(source::Value::triv(source::Triv::int64(9))),
+    )));
 
     let x64 = ir.clone().generate_x64();
     let result = ir.link_paren_x64().interp_loop();
@@ -29,8 +29,8 @@ mov rax, 9"
 #[test]
 #[serial]
 fn basic_with_let_bindings() {
-    let ir = compile(source::ValuesLang(source::P::module(source::Tail::value(
-        source::Value::r#let {
+    let ir = compile(source::ValuesLang(source::P::module(
+        source::Tail::value(source::Value::r#let {
             bindings: vec![(
                 "x".into(),
                 source::Value::triv(source::Triv::int64(100)),
@@ -40,8 +40,8 @@ fn basic_with_let_bindings() {
             value: Box::new(source::Value::triv(source::Triv::name(
                 "x".into(),
             ))),
-        },
-    ))));
+        }),
+    )));
 
     let x64 = ir.clone().generate_x64();
     let result = ir.link_paren_x64().interp_loop();

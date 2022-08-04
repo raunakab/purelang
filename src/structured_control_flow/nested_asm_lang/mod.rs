@@ -75,7 +75,8 @@ impl NestedAsmLang {
                     let triv = target::Triv::opand(triv);
                     let effect = target::Effect::set { loc, triv };
                     let mut effects = vec![effect];
-                    let tail = make_begins!((effects, tail) => target::Tail::tail);
+                    let tail =
+                        make_begins!((effects, tail) => target::Tail::tail);
                     (tail, bs)
                 },
                 self::Effect::set_binop { loc, binop, triv } => {
@@ -85,7 +86,8 @@ impl NestedAsmLang {
                         opand: triv,
                     };
                     let mut effects = vec![effect];
-                    let tail = make_begins!((effects, tail) => target::Tail::tail);
+                    let tail =
+                        make_begins!((effects, tail) => target::Tail::tail);
                     (tail, bs)
                 },
                 self::Effect::begin(effects) => {

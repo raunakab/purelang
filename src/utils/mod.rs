@@ -7,6 +7,8 @@ use std::sync::Mutex;
 use derivative::*;
 use lazy_static::lazy_static;
 
+pub type Name = String;
+
 pub type AlocSet = HashSet<Aloc>;
 
 pub type Assignments<Loc> = HashMap<Aloc, Loc>;

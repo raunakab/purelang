@@ -1,8 +1,8 @@
 use serial_test::serial;
 
-use crate::utils;
 use crate::imperative_abstractions::values_lang as source;
 use crate::imperative_abstractions::values_unique_lang as target;
+use crate::utils;
 
 #[test]
 #[serial]
@@ -15,17 +15,13 @@ fn book_example_1() {
         },
     )));
 
-    let expected = target::ValuesUniqueLang {
-        p: target::P::module {
-            tail: target::Tail::value {
-                value: target::Value::binop_triv_triv {
-                    binop: utils::Binop::plus,
-                    triv1: target::Triv::int64 { int64: 2 },
-                    triv2: target::Triv::int64 { int64: 2 },
-                },
-            },
-        },
-    };
+    let expected = target::ValuesUniqueLang(target::P::module(
+        target::Tail::value(target::Value::binop_triv_triv {
+            binop: utils::Binop::plus,
+            triv1: target::Triv::int64(2),
+            triv2: target::Triv::int64(2),
+        }),
+    ));
 
     let actual = program.uniquify();
 
@@ -51,22 +47,18 @@ fn book_example_2() {
 
     let aloc = utils::Aloc::fresh();
 
-    let expected = target::ValuesUniqueLang {
-        p: target::P::module {
-            tail: target::Tail::r#let {
-                bindings: vec![(aloc.clone(), target::Value::triv {
-                    triv: target::Triv::int64 { int64: 5 },
-                })]
-                .into_iter()
-                .collect::<_>(),
-                tail: Box::new(target::Tail::value {
-                    value: target::Value::triv {
-                        triv: target::Triv::aloc { aloc },
-                    },
-                }),
-            },
-        },
-    };
+    let expected =
+        target::ValuesUniqueLang(target::P::module(target::Tail::r#let {
+            bindings: vec![(
+                aloc.clone(),
+                target::Value::triv(target::Triv::int64(5)),
+            )]
+            .into_iter()
+            .collect::<_>(),
+            tail: Box::new(target::Tail::value(target::Value::triv(
+                target::Triv::aloc(aloc),
+            ))),
+        }));
 
     utils::reset_all_indices();
 

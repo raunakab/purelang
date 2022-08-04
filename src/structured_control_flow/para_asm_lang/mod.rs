@@ -3,8 +3,8 @@ pub mod data;
 mod tests;
 
 pub use self::data::*;
-use crate::utils;
 use crate::structured_control_flow::paren_x64_fvars as target;
+use crate::utils;
 
 #[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub struct ParaAsmLang(pub self::P);
@@ -179,7 +179,8 @@ impl ParaAsmLang {
                                 // reg <- reg + aux_reg
                                 || {
                                     let (aux_reg, _) =
-                                    utils::Reg::current_auxiliary_registers();
+                                        utils::Reg::current_auxiliary_registers(
+                                        );
 
                                     let instr1 = target::S::set_reg_triv {
                                         reg: aux_reg,
@@ -221,51 +222,68 @@ impl ParaAsmLang {
                         },
 
                         (self::Loc::fvar(fvar), self::Opand::int64(int64)) => {
-                            i32::try_from(int64)
-                            .ok()
-                            .map_or_else(
-                                    // aux_reg <- int64
-                                    // aux_reg' <- fvar
-                                    // aux_reg <- aux_reg + aux_reg'
-                                    // fvar <- aux_reg
-                                    || {
-                                        let (aux_reg, aux_reg_2) = utils::Reg::current_auxiliary_registers();
+                            i32::try_from(int64).ok().map_or_else(
+                                // aux_reg <- int64
+                                // aux_reg' <- fvar
+                                // aux_reg <- aux_reg + aux_reg'
+                                // fvar <- aux_reg
+                                || {
+                                    let (aux_reg, aux_reg_2) =
+                                        utils::Reg::current_auxiliary_registers(
+                                        );
 
-                                        let instr1 = target::S::set_reg_triv { reg: aux_reg, triv: target::Triv::int64(int64) };
+                                    let instr1 = target::S::set_reg_triv {
+                                        reg: aux_reg,
+                                        triv: target::Triv::int64(int64),
+                                    };
 
-                                        let instr2 = target::S::set_reg_loc { reg: aux_reg_2, loc: target::Loc::fvar(fvar) };
+                                    let instr2 = target::S::set_reg_loc {
+                                        reg: aux_reg_2,
+                                        loc: target::Loc::fvar(fvar),
+                                    };
 
-                                        let instr3 = target::S::set_reg_binop_reg_loc { reg: aux_reg, binop, loc: target::Loc::reg(aux_reg_2) };
+                                    let instr3 =
+                                        target::S::set_reg_binop_reg_loc {
+                                            reg: aux_reg,
+                                            binop,
+                                            loc: target::Loc::reg(aux_reg_2),
+                                        };
 
-                                        let instr4 = target::S::set_fvar_trg { fvar, trg: target::Trg::reg(aux_reg) };
+                                    let instr4 = target::S::set_fvar_trg {
+                                        fvar,
+                                        trg: target::Trg::reg(aux_reg),
+                                    };
 
-                                        vec![
-                                            instr1,
-                                            instr2,
-                                            instr3,
-                                            instr4,
-                                        ]
-                                    },
+                                    vec![instr1, instr2, instr3, instr4]
+                                },
+                                // aux_reg <- fvar
+                                // aux_reg <- aux_reg + int32
+                                // fvar <- aux_reg
+                                |int32| {
+                                    let (aux_reg, _) =
+                                        utils::Reg::current_auxiliary_registers(
+                                        );
 
-                                    // aux_reg <- fvar
-                                    // aux_reg <- aux_reg + int32
-                                    // fvar <- aux_reg
-                                    |int32| {
-                                        let (aux_reg, _) = utils::Reg::current_auxiliary_registers();
+                                    let instr1 = target::S::set_reg_loc {
+                                        reg: aux_reg,
+                                        loc: target::Loc::fvar(fvar),
+                                    };
 
-                                        let instr1 = target::S::set_reg_loc { reg: aux_reg, loc: target::Loc::fvar(fvar) };
+                                    let instr2 =
+                                        target::S::set_reg_binop_reg_int32 {
+                                            reg: aux_reg,
+                                            binop,
+                                            int32,
+                                        };
 
-                                        let instr2 = target::S::set_reg_binop_reg_int32 { reg: aux_reg, binop, int32 };
+                                    let instr3 = target::S::set_fvar_trg {
+                                        fvar,
+                                        trg: target::Trg::reg(aux_reg),
+                                    };
 
-                                        let instr3 = target::S::set_fvar_trg { fvar, trg: target::Trg::reg(aux_reg) };
-
-                                        vec![
-                                            instr1,
-                                            instr2,
-                                            instr3,
-                                        ]
-                                    },
-                                )
+                                    vec![instr1, instr2, instr3]
+                                },
+                            )
                         },
 
                         (self::Loc::fvar(fvar), self::Opand::loc(loc)) => {
@@ -275,7 +293,8 @@ impl ParaAsmLang {
                                 // fvar <- aux_reg
                                 self::Loc::reg(reg) => {
                                     let (aux_reg, _) =
-                                    utils::Reg::current_auxiliary_registers();
+                                        utils::Reg::current_auxiliary_registers(
+                                        );
 
                                     let instr1 = target::S::set_reg_loc {
                                         reg: aux_reg,
@@ -303,7 +322,8 @@ impl ParaAsmLang {
                                 // fvar <- aux_reg
                                 self::Loc::fvar(fvar2) => {
                                     let (aux_reg, aux_reg_2) =
-                                    utils::Reg::current_auxiliary_registers();
+                                        utils::Reg::current_auxiliary_registers(
+                                        );
 
                                     let instr1 = target::S::set_reg_loc {
                                         reg: aux_reg,

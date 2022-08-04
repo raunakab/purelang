@@ -79,9 +79,7 @@ impl ParenX64Fvars {
             }
         }
 
-        fn implement_fvar(
-            utils::Fvar(index): utils::Fvar,
-        ) -> utils::Addr {
+        fn implement_fvar(utils::Fvar(index): utils::Fvar) -> utils::Addr {
             let fbp = utils::Reg::current_frame_base_pointer();
 
             let disp_offset = index * 8;

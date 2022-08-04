@@ -1,8 +1,8 @@
 use serial_test::serial;
 
+use crate::structured_control_flow::paren_x64_fvars as source;
 use crate::utils;
 use crate::x64::paren_x64 as target;
-use crate::structured_control_flow::paren_x64_fvars as source;
 
 #[test]
 #[serial]

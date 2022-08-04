@@ -8,12 +8,12 @@ use crate::utils;
 #[test]
 #[serial]
 fn basic_recursion_depth_0() {
-    let program = source::AsmLang(source::P::module {
+    let program = source::AsmPredLang(source::P::module {
         info: utils::Info::default(),
         tail: source::Tail::halt(source::Triv::int64(10)),
     });
 
-    let source::AsmLang(p) = program.undead_analysis();
+    let source::AsmPredLang(p) = program.undead_analysis();
 
     match p {
         source::P::module {
@@ -28,7 +28,7 @@ fn basic_recursion_depth_0() {
 #[test]
 #[serial]
 fn basic_recursion_depth_1() {
-    let program = source::AsmLang(source::P::module {
+    let program = source::AsmPredLang(source::P::module {
         info: utils::Info::default(),
         tail: source::Tail::begin {
             effects: vec![],
@@ -36,7 +36,7 @@ fn basic_recursion_depth_1() {
         },
     });
 
-    let source::AsmLang(p) = program.undead_analysis();
+    let source::AsmPredLang(p) = program.undead_analysis();
 
     match p {
         source::P::module {
@@ -55,7 +55,7 @@ fn basic_recursion_depth_1() {
 #[test]
 #[serial]
 fn basic_recursion_depth_2() {
-    let program = source::AsmLang(source::P::module {
+    let program = source::AsmPredLang(source::P::module {
         info: utils::Info::default(),
         tail: source::Tail::begin {
             effects: vec![],
@@ -66,7 +66,7 @@ fn basic_recursion_depth_2() {
         },
     });
 
-    let source::AsmLang(p) = program.undead_analysis();
+    let source::AsmPredLang(p) = program.undead_analysis();
 
     match p {
         source::P::module {
@@ -91,7 +91,7 @@ fn basic_recursion_depth_2() {
 fn basic_begins_with_triv_ref() {
     let aloc = utils::Aloc::fresh();
 
-    let program = source::AsmLang(source::P::module {
+    let program = source::AsmPredLang(source::P::module {
         info: utils::Info::default(),
         tail: source::Tail::begin {
             effects: vec![source::Effect::set_aloc_triv {
@@ -104,7 +104,7 @@ fn basic_begins_with_triv_ref() {
         },
     });
 
-    let source::AsmLang(p) = program.undead_analysis();
+    let source::AsmPredLang(p) = program.undead_analysis();
 
     match p {
         source::P::module {
@@ -133,7 +133,7 @@ fn basic_begins_with_multiple_effects() {
     let aloc = utils::Aloc::fresh();
     let aloc2 = utils::Aloc::fresh();
 
-    let program = source::AsmLang(source::P::module {
+    let program = source::AsmPredLang(source::P::module {
         info: utils::Info::default(),
         tail: source::Tail::begin {
             effects: vec![
@@ -152,7 +152,7 @@ fn basic_begins_with_multiple_effects() {
         },
     });
 
-    let source::AsmLang(p) = program.undead_analysis();
+    let source::AsmPredLang(p) = program.undead_analysis();
 
     match p {
         source::P::module {
@@ -186,7 +186,7 @@ fn basic_begins_with_multiple_effects_2() {
     let aloc = utils::Aloc::fresh();
     let aloc2 = utils::Aloc::fresh();
 
-    let program = source::AsmLang(source::P::module {
+    let program = source::AsmPredLang(source::P::module {
         info: utils::Info::default(),
         tail: source::Tail::begin {
             effects: vec![
@@ -209,7 +209,7 @@ fn basic_begins_with_multiple_effects_2() {
         },
     });
 
-    let source::AsmLang(p) = program.undead_analysis();
+    let source::AsmPredLang(p) = program.undead_analysis();
 
     match p {
         source::P::module {
@@ -245,7 +245,7 @@ fn basic_begins_with_multiple_effects_2() {
 fn intermediary_begins_with_empty_nested_begin() {
     let aloc = utils::Aloc::fresh();
 
-    let program = source::AsmLang(source::P::module {
+    let program = source::AsmPredLang(source::P::module {
         info: utils::Info::default(),
         tail: source::Tail::begin {
             effects: vec![source::Effect::begin(vec![])],
@@ -253,7 +253,7 @@ fn intermediary_begins_with_empty_nested_begin() {
         },
     });
 
-    let source::AsmLang(p) = program.undead_analysis();
+    let source::AsmPredLang(p) = program.undead_analysis();
 
     match p {
         source::P::module {
@@ -283,7 +283,7 @@ fn intermediary_begins_with_empty_nested_begin() {
 fn intermediary_begins_with_nested_begin() {
     let aloc = utils::Aloc::fresh();
 
-    let program = source::AsmLang(source::P::module {
+    let program = source::AsmPredLang(source::P::module {
         info: utils::Info::default(),
         tail: source::Tail::begin {
             effects: vec![source::Effect::begin(vec![
@@ -298,7 +298,7 @@ fn intermediary_begins_with_nested_begin() {
         },
     });
 
-    let source::AsmLang(p) = program.undead_analysis();
+    let source::AsmPredLang(p) = program.undead_analysis();
 
     match p {
         source::P::module {

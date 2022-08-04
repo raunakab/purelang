@@ -10,7 +10,7 @@ use crate::utils;
 fn basic() {
     let aloc = utils::Aloc::fresh();
 
-    let program = source::AsmLang(source::P::module {
+    let program = source::AsmPredLang(source::P::module {
         info: utils::Info {
             locals: Some(vec![aloc.clone()].into_iter().collect()),
             undead_out: Some(utils::Node::tree {
@@ -35,7 +35,7 @@ fn basic() {
         },
     });
 
-    let source::AsmLang(p) = program.conflict_analysis();
+    let source::AsmPredLang(p) = program.conflict_analysis();
 
     match p {
         source::P::module {

@@ -166,22 +166,14 @@ impl ParenX64Rt {
             }
         }
 
-        fn bin_operate(
-            binop: &utils::Binop,
-            value1: i64,
-            value2: i64,
-        ) -> i64 {
+        fn bin_operate(binop: &utils::Binop, value1: i64, value2: i64) -> i64 {
             match binop {
                 utils::Binop::plus => value1 + value2,
                 utils::Binop::multiply => value1 * value2,
             }
         }
 
-        fn rel_operate(
-            relop: &utils::Relop,
-            value1: i64,
-            value2: i64,
-        ) -> bool {
+        fn rel_operate(relop: &utils::Relop, value1: i64, value2: i64) -> bool {
             match relop {
                 utils::Relop::gt => value1 < value2,
                 utils::Relop::gte => value1 <= value2,

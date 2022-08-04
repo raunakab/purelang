@@ -9,7 +9,7 @@ pub enum P {
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Pred {
-    relop_triv_triv {
+    relop {
         relop: utils::Relop,
         triv1: Triv,
         triv2: Triv,
@@ -22,9 +22,9 @@ pub enum Pred {
         pred: Box<Self>,
     },
     r#if {
-        pred: Box<Self>,
-        csqt: Box<Self>,
-        antc: Box<Self>,
+        pred1: Box<Self>,
+        pred2: Box<Self>,
+        pred3: Box<Self>,
     },
 }
 
@@ -32,13 +32,13 @@ pub enum Pred {
 pub enum Tail {
     value(Value),
     r#let {
-        bindings: HashMap<Name, Value>,
+        bindings: Bindings,
         tail: Box<Self>,
     },
     r#if {
         pred: Pred,
-        csqt: Box<Self>,
-        antc: Box<Self>,
+        tail1: Box<Self>,
+        tail2: Box<Self>,
     },
 }
 
@@ -56,17 +56,15 @@ pub enum Value {
     },
     r#if {
         pred: Pred,
-        csqt: Box<Self>,
-        antc: Box<Self>,
+        value1: Box<Self>,
+        value2: Box<Self>,
     },
 }
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Triv {
     int64(i64),
-    name(Name),
+    name(utils::Name),
 }
 
-pub type Name = String;
-
-pub type Bindings = HashMap<Name, Value>;
+pub type Bindings = HashMap<utils::Name, Value>;
