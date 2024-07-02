@@ -1,9 +1,11 @@
 use crate::utils;
 
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum P {
     module(Tail),
 }
 
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum Pred {
     relop {
         relop: utils::Relop,
@@ -24,6 +26,7 @@ pub enum Pred {
     },
 }
 
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum Tail {
     halt(Triv),
     begin {
@@ -37,6 +40,7 @@ pub enum Tail {
     },
 }
 
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum Effect {
     set {
         loc: Loc,

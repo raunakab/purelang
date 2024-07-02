@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use crate::utils;
 
 #[cfg_attr(test, derive(Debug, PartialEq, Eq))]
@@ -17,8 +15,8 @@ pub struct Lambda {
 #[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum Tail {
     value(Value),
-    r#let {
-        bindings: Bindings,
+    begin {
+        effects: Vec<Effect>,
         tail: Box<Tail>,
     },
     r#if {
@@ -42,14 +40,28 @@ pub enum Pred {
     r#true,
     r#false,
     not(Box<Self>),
-    r#let {
-        bindings: Bindings,
+    begin {
+        effects: Vec<Effect>,
         pred: Box<Self>,
     },
     r#if {
         pred1: Box<Self>,
         pred2: Box<Self>,
         pred3: Box<Self>,
+    },
+}
+
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
+pub enum Effect {
+    set_aloc_value {
+        aloc: utils::Aloc,
+        value: Value,
+    },
+    begin(Vec<Effect>),
+    r#if {
+        pred: Pred,
+        effect1: Box<Self>,
+        effect2: Box<Self>,
     },
 }
 
@@ -61,19 +73,8 @@ pub enum Value {
         opand1: Opand,
         opand2: Opand,
     },
-    r#let {
-        bindings: Bindings,
-        value: Box<Self>,
-    },
-    r#if {
-        pred: Pred,
-        value1: Box<Self>,
-        value2: Box<Self>,
-    },
 }
 
 pub type Opand = super::target::Opand;
 
 pub type Triv = super::target::Triv;
-
-pub type Bindings = HashMap<utils::Aloc, Value>;

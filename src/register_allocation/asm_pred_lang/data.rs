@@ -5,8 +5,17 @@ use crate::utils;
 pub enum P {
     module {
         info: utils::Info<super::target::Loc>,
+        lambdas: Vec<Lambda>,
         tail: Tail,
     },
+}
+
+#[derive(PartialEq, Eq)]
+#[cfg_attr(test, derive(Debug))]
+pub struct Lambda {
+    label: utils::Label,
+    info: utils::Info<super::target::Loc>,
+    tail: Tail,
 }
 
 #[derive(PartialEq, Eq)]
@@ -71,4 +80,26 @@ pub enum Effect {
 pub enum Triv {
     int64(i64),
     aloc(utils::Aloc),
+}
+
+pub type Opand = super::target::Triv;
+
+// pub enum Opand {
+//     int64(i64),
+//     loc(Loc),
+// }
+
+pub enum Loc {
+    aloc(utils::Aloc),
+    rloc(Rloc),
+}
+
+pub enum Rloc {
+    reg(utils::Reg),
+    fvar(utils::Fvar),
+}
+
+pub enum Trg {
+    label(utils::Label),
+    loc(Loc),
 }

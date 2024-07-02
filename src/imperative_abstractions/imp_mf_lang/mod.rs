@@ -5,7 +5,7 @@ mod tests;
 use either::Either;
 
 pub use self::data::*;
-use crate::imperative_abstractions::imp_cmf_lang as target;
+use crate::imperative_abstractions::proc_imp_cmf_lang as target;
 use crate::utils;
 
 #[cfg_attr(test, derive(Debug, PartialEq, Eq))]
@@ -17,16 +17,30 @@ impl ImpMfLang {
     /// that the right-hand-side of each set! is simple value-producing
     /// operation. This normalizes Imp-mf-lang v3 with respect to the
     /// equations.
-    pub fn normalize_bind(self) -> target::ImpCmfLang {
+    pub fn normalize_bind(self) -> target::ProcImpCmfLang {
         let Self(p) = self;
 
         fn normalize_p(p: self::P) -> target::P {
             match p {
-                self::P::module(tail) => {
+                self::P::module { lambdas, tail } => {
+                    let lambdas = normalize_lambdas(lambdas);
                     let tail = normalize_tail(tail);
-                    target::P::module(tail)
+                    target::P::module { lambdas, tail }
                 },
             }
+        }
+
+        fn normalize_lambdas(
+            lambdas: Vec<self::Lambda>,
+        ) -> Vec<target::Lambda> {
+            lambdas.into_iter().map(normalize_lambda).collect()
+        }
+
+        fn normalize_lambda(
+            Lambda { label, args, tail }: self::Lambda,
+        ) -> target::Lambda {
+            let tail = normalize_tail(tail);
+            target::Lambda { label, args, tail }
         }
 
         fn normalize_tail(tail: self::Tail) -> target::Tail {
@@ -48,6 +62,9 @@ impl ImpMfLang {
                     let tail2 = Box::new(tail2);
                     target::Tail::r#if { pred, tail1, tail2 }
                 },
+                self::Tail::call { triv, opands } => {
+                    target::Tail::call { triv, opands }
+                },
             }
         }
 
@@ -64,15 +81,15 @@ impl ImpMfLang {
                                 target::Effect::set_aloc_value { aloc, value };
                             vec![effect]
                         },
-                        self::Value::binop_triv_triv {
+                        self::Value::binop {
                             binop,
-                            triv1,
-                            triv2,
+                            opand1,
+                            opand2,
                         } => {
-                            let value = target::Value::binop_triv_triv {
+                            let value = target::Value::binop {
                                 binop,
-                                triv1,
-                                triv2,
+                                opand1,
+                                opand2,
                             };
                             let effect =
                                 target::Effect::set_aloc_value { aloc, value };
@@ -112,7 +129,6 @@ impl ImpMfLang {
                             vec![effect]
                         },
                     };
-
                     Either::Right(effects)
                 },
                 None => {
@@ -121,15 +137,15 @@ impl ImpMfLang {
                             let value = target::Value::triv(triv);
                             target::Tail::value(value)
                         },
-                        self::Value::binop_triv_triv {
+                        self::Value::binop {
                             binop,
-                            triv1,
-                            triv2,
+                            opand1,
+                            opand2,
                         } => {
-                            let value = target::Value::binop_triv_triv {
+                            let value = target::Value::binop {
                                 binop,
-                                triv1,
-                                triv2,
+                                opand1,
+                                opand2,
                             };
                             target::Tail::value(value)
                         },
@@ -155,7 +171,6 @@ impl ImpMfLang {
                             target::Tail::r#if { pred, tail1, tail2 }
                         },
                     };
-
                     Either::Left(tail)
                 },
             }
@@ -193,12 +208,12 @@ impl ImpMfLang {
             match pred {
                 self::Pred::relop {
                     relop,
-                    triv1,
-                    triv2,
+                    opand1,
+                    opand2,
                 } => target::Pred::relop {
                     relop,
-                    triv1,
-                    triv2,
+                    opand1,
+                    opand2,
                 },
                 self::Pred::r#true => target::Pred::r#true,
                 self::Pred::r#false => target::Pred::r#false,
@@ -244,6 +259,6 @@ impl ImpMfLang {
         }
 
         let p = normalize_p(p);
-        target::ImpCmfLang(p)
+        target::ProcImpCmfLang(p)
     }
 }

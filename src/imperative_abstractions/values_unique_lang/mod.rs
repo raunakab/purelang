@@ -28,12 +28,21 @@ impl ValuesUniqueLang {
 
         fn seq_p(p: self::P) -> target::P {
             match p {
-                self::P::module(tail) => {
+                self::P::module { lambdas, tail } => {
+                    let lambdas = seq_lambdas(lambdas);
                     let tail = seq_tail(tail);
-
-                    target::P::module(tail)
+                    target::P::module { lambdas, tail }
                 },
             }
+        }
+
+        fn seq_lambdas(lambdas: Vec<Lambda>) -> Vec<target::Lambda> {
+            lambdas.into_iter().map(seq_lambda).collect()
+        }
+
+        fn seq_lambda(Lambda { label, args, tail }: Lambda) -> target::Lambda {
+            let tail = seq_tail(tail);
+            target::Lambda { label, args, tail }
         }
 
         fn seq_tail(tail: self::Tail) -> target::Tail {
@@ -56,6 +65,9 @@ impl ValuesUniqueLang {
                     let tail2 = Box::new(tail2);
                     target::Tail::r#if { pred, tail1, tail2 }
                 },
+                self::Tail::call { triv, opands } => {
+                    target::Tail::call { triv, opands }
+                },
             }
         }
 
@@ -63,16 +75,20 @@ impl ValuesUniqueLang {
             match pred {
                 self::Pred::relop {
                     relop,
-                    triv1,
-                    triv2,
+                    opand1,
+                    opand2,
                 } => target::Pred::relop {
                     relop,
-                    triv1,
-                    triv2,
+                    opand1,
+                    opand2,
                 },
                 self::Pred::r#true => target::Pred::r#true,
                 self::Pred::r#false => target::Pred::r#false,
-                self::Pred::not(pred) => seq_pred(*pred),
+                self::Pred::not(pred) => {
+                    let pred = seq_pred(*pred);
+                    let pred = Box::new(pred);
+                    target::Pred::not(pred)
+                },
                 self::Pred::r#let { bindings, pred } => {
                     let effects = seq_bindings(bindings);
                     let pred = seq_pred(*pred);
@@ -102,14 +118,14 @@ impl ValuesUniqueLang {
         fn seq_value(value: self::Value) -> target::Value {
             match value {
                 self::Value::triv(triv) => target::Value::triv(triv),
-                self::Value::binop_triv_triv {
+                self::Value::binop {
                     binop,
-                    triv1,
-                    triv2,
-                } => target::Value::binop_triv_triv {
+                    opand1,
+                    opand2,
+                } => target::Value::binop {
                     binop,
-                    triv1,
-                    triv2,
+                    opand1,
+                    opand2,
                 },
                 self::Value::r#let { bindings, value } => {
                     let effects = seq_bindings(bindings);
@@ -141,7 +157,6 @@ impl ValuesUniqueLang {
                 .into_iter()
                 .map(|(aloc, value)| {
                     let value = seq_value(value);
-
                     target::Effect::set_aloc_value { aloc, value }
                 })
                 .collect::<Vec<_>>()

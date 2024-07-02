@@ -94,7 +94,7 @@ fn labeled_jump() {
                 triv: source::Triv::int64(11),
             }),
         },
-        source::S::jump_trg(source::Trg::label(jumper)),
+        source::S::jump(source::Trg::label(jumper)),
         source::S::set_reg_loc {
             reg: utils::Reg::rax,
             loc: source::Loc::reg(utils::Reg::rbx),
@@ -156,7 +156,7 @@ fn compared_jump() {
                 triv: source::Triv::int64(11),
             }),
         },
-        source::S::jump_trg(source::Trg::label(finish.clone())),
+        source::S::jump(source::Trg::label(finish.clone())),
         source::S::with_label {
             label: jumper2,
             s: Box::new(source::S::set_reg_triv {

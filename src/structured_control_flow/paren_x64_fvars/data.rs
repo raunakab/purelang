@@ -38,7 +38,7 @@ pub enum S {
         s: Box<Self>,
     },
     jump(Trg),
-    compare_reg_opand_jump_if {
+    compare {
         reg: utils::Reg,
         opand: Opand,
         relop: utils::Relop,

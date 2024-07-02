@@ -1,13 +1,16 @@
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fmt::Debug;
+use std::hash::Hash;
 use std::sync::Arc;
 use std::sync::Mutex;
 
 use derivative::*;
+use itertools::FoldWhile;
+use itertools::Itertools;
 use lazy_static::lazy_static;
 
-pub type Name = String;
+pub type Name = &'static str;
 
 pub type AlocSet = HashSet<Aloc>;
 
@@ -61,7 +64,7 @@ pub fn reset_all_indices() {
     reset_index(&LABEL_INDEX);
 }
 
-#[derive(Derivative, Clone, Hash, PartialEq, Eq)]
+#[derive(Default, Derivative, Clone, Hash, PartialEq, Eq)]
 #[derivative(PartialOrd, Ord)]
 pub struct Aloc {
     #[derivative(PartialOrd = "ignore", Ord = "ignore")]
@@ -339,5 +342,81 @@ impl Graph {
         );
 
         Self { graph }
+    }
+}
+
+#[cfg_attr(test, derive(Debug))]
+pub struct LevelledEnv<K, V> {
+    next_level: usize,
+    levels: HashMap<usize, HashMap<K, V>>,
+}
+
+impl<K, V> Default for LevelledEnv<K, V>
+where
+    K: Eq + Hash,
+{
+    fn default() -> Self {
+        // let next_level = 0;
+        let next_level = usize::default();
+        let levels = HashMap::default();
+        Self { next_level, levels }
+    }
+}
+
+impl<K, V> LevelledEnv<K, V>
+where
+    K: Eq + Hash,
+{
+    pub fn with_capacity(capacity: usize) -> Self {
+        let next_level = usize::default();
+        let levels = HashMap::with_capacity(capacity);
+        Self { next_level, levels }
+    }
+
+    pub fn add_level(self) -> Self {
+        let Self {
+            next_level,
+            mut levels,
+        } = self;
+        levels.insert(next_level, HashMap::default());
+        let next_level = next_level + 1;
+        Self { next_level, levels }
+    }
+
+    pub fn remove_level(self) -> Self {
+        let Self {
+            next_level,
+            mut levels,
+        } = self;
+        let next_level = next_level - 1;
+        levels.remove(&next_level);
+        Self { next_level, levels }
+    }
+
+    pub fn insert(self, a: K, b: V) -> Self {
+        let Self {
+            next_level,
+            mut levels,
+        } = self;
+        let level = next_level - 1;
+        levels.get_mut(&level).map(|map| map.insert(a, b));
+        Self { next_level, levels }
+    }
+
+    pub fn get(&self, key: &K) -> Option<&V> {
+        let Self { next_level, levels } = self;
+        let level = next_level - 1;
+        (level..=0)
+            .fold_while(None, |_, level| {
+                levels
+                    .get(&level)
+                    .map(|map| map.get(key))
+                    .unwrap()
+                    .map_or_else(
+                        || FoldWhile::Continue(None),
+                        |value| FoldWhile::Done(Some(value)),
+                    )
+            })
+            .into_inner()
     }
 }

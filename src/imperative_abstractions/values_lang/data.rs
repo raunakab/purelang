@@ -1,13 +1,18 @@
-use std::collections::HashMap;
-
 use crate::utils;
 
-#[derive(Debug, PartialEq, Eq)]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum P {
-    module(Tail),
+    module { lambdas: Vec<Lambda>, tail: Tail },
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
+pub struct Lambda {
+    pub name: utils::Name,
+    pub args: Vec<utils::Name>,
+    pub tail: Tail,
+}
+
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum Pred {
     relop {
         relop: utils::Relop,
@@ -28,7 +33,7 @@ pub enum Pred {
     },
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum Tail {
     value(Value),
     r#let {
@@ -40,9 +45,13 @@ pub enum Tail {
         tail1: Box<Self>,
         tail2: Box<Self>,
     },
+    call {
+        name: utils::Name,
+        args: Vec<Triv>,
+    },
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum Value {
     triv(Triv),
     binop_triv_triv {
@@ -61,10 +70,10 @@ pub enum Value {
     },
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum Triv {
     int64(i64),
     name(utils::Name),
 }
 
-pub type Bindings = HashMap<utils::Name, Value>;
+pub type Bindings = Vec<(utils::Name, Value)>;

@@ -406,7 +406,7 @@ impl ParaAsmLang {
                         self::Opand::int64(int64),
                         self::Trg::label(label),
                     ) => {
-                        let instr = target::S::compare_reg_opand_jump_if {
+                        let instr = target::S::compare {
                             reg,
                             opand: target::Opand::int64(int64),
                             relop,
@@ -423,7 +423,7 @@ impl ParaAsmLang {
                         self::Loc::reg(reg) => {
                             let label = generate_neg_jump_label();
 
-                            let instr1 = target::S::compare_reg_opand_jump_if {
+                            let instr1 = target::S::compare {
                                 reg,
                                 opand: target::Opand::int64(int64),
                                 relop: !relop,
@@ -445,7 +445,7 @@ impl ParaAsmLang {
 
                             let label = generate_neg_jump_label();
 
-                            let instr1 = target::S::compare_reg_opand_jump_if {
+                            let instr1 = target::S::compare {
                                 reg,
                                 opand: target::Opand::int64(int64),
                                 relop: !relop,
@@ -474,7 +474,7 @@ impl ParaAsmLang {
                         self::Trg::label(label),
                     ) => match loc {
                         self::Loc::reg(reg2) => {
-                            let instr = target::S::compare_reg_opand_jump_if {
+                            let instr = target::S::compare {
                                 reg,
                                 opand: target::Opand::reg(reg2),
                                 relop,
@@ -492,7 +492,7 @@ impl ParaAsmLang {
                                 loc: target::Loc::fvar(fvar),
                             };
 
-                            let instr2 = target::S::compare_reg_opand_jump_if {
+                            let instr2 = target::S::compare {
                                 reg,
                                 opand: target::Opand::reg(aux_reg),
                                 relop,
@@ -510,7 +510,7 @@ impl ParaAsmLang {
                         (self::Loc::reg(reg2), self::Loc::reg(reg3)) => {
                             let label = generate_neg_jump_label();
 
-                            let instr1 = target::S::compare_reg_opand_jump_if {
+                            let instr1 = target::S::compare {
                                 reg,
                                 opand: target::Opand::reg(reg2),
                                 relop: !relop,
@@ -533,7 +533,7 @@ impl ParaAsmLang {
 
                             let label = generate_neg_jump_label();
 
-                            let instr1 = target::S::compare_reg_opand_jump_if {
+                            let instr1 = target::S::compare {
                                 reg,
                                 opand: target::Opand::reg(reg2),
                                 relop: !relop,
@@ -566,7 +566,7 @@ impl ParaAsmLang {
                                 loc: target::Loc::fvar(fvar2),
                             };
 
-                            let instr2 = target::S::compare_reg_opand_jump_if {
+                            let instr2 = target::S::compare {
                                 reg,
                                 opand: target::Opand::reg(aux_reg),
                                 relop: !relop,
@@ -594,7 +594,7 @@ impl ParaAsmLang {
                                 loc: target::Loc::fvar(fvar2),
                             };
 
-                            let instr2 = target::S::compare_reg_opand_jump_if {
+                            let instr2 = target::S::compare {
                                 reg,
                                 opand: target::Opand::reg(aux_reg),
                                 relop: !relop,
@@ -631,7 +631,7 @@ impl ParaAsmLang {
                             loc: target::Loc::fvar(fvar),
                         };
 
-                        let instr2 = target::S::compare_reg_opand_jump_if {
+                        let instr2 = target::S::compare {
                             reg: aux_reg,
                             opand: target::Opand::int64(int64),
                             relop,
@@ -656,7 +656,7 @@ impl ParaAsmLang {
                                 loc: target::Loc::fvar(fvar),
                             };
 
-                            let instr2 = target::S::compare_reg_opand_jump_if {
+                            let instr2 = target::S::compare {
                                 reg: aux_reg,
                                 opand: target::Opand::int64(int64),
                                 relop: !relop,
@@ -683,7 +683,7 @@ impl ParaAsmLang {
                                 loc: target::Loc::fvar(fvar),
                             };
 
-                            let instr2 = target::S::compare_reg_opand_jump_if {
+                            let instr2 = target::S::compare {
                                 reg: aux_reg,
                                 opand: target::Opand::int64(int64),
                                 relop: !relop,
@@ -720,7 +720,7 @@ impl ParaAsmLang {
                                 loc: target::Loc::fvar(fvar),
                             };
 
-                            let instr2 = target::S::compare_reg_opand_jump_if {
+                            let instr2 = target::S::compare {
                                 reg: aux_reg,
                                 opand: target::Opand::reg(reg2),
                                 relop,
@@ -743,7 +743,7 @@ impl ParaAsmLang {
                                 loc: target::Loc::fvar(fvar2),
                             };
 
-                            let instr3 = target::S::compare_reg_opand_jump_if {
+                            let instr3 = target::S::compare {
                                 reg: aux_reg,
                                 opand: target::Opand::reg(aux_reg_2),
                                 relop,
@@ -769,7 +769,7 @@ impl ParaAsmLang {
                                 loc: target::Loc::fvar(fvar),
                             };
 
-                            let instr2 = target::S::compare_reg_opand_jump_if {
+                            let instr2 = target::S::compare {
                                 reg: aux_reg,
                                 opand: target::Opand::reg(reg2),
                                 relop: !relop,
@@ -797,7 +797,7 @@ impl ParaAsmLang {
                                 loc: target::Loc::fvar(fvar),
                             };
 
-                            let instr2 = target::S::compare_reg_opand_jump_if {
+                            let instr2 = target::S::compare {
                                 reg: aux_reg,
                                 opand: target::Opand::reg(reg2),
                                 relop: !relop,
@@ -835,7 +835,7 @@ impl ParaAsmLang {
                                 loc: target::Loc::fvar(fvar2),
                             };
 
-                            let instr3 = target::S::compare_reg_opand_jump_if {
+                            let instr3 = target::S::compare {
                                 reg: aux_reg,
                                 opand: target::Opand::reg(aux_reg_2),
                                 relop: !relop,
@@ -868,7 +868,7 @@ impl ParaAsmLang {
                                 loc: target::Loc::fvar(fvar2),
                             };
 
-                            let instr3 = target::S::compare_reg_opand_jump_if {
+                            let instr3 = target::S::compare {
                                 reg: aux_reg,
                                 opand: target::Opand::reg(aux_reg_2),
                                 relop: !relop,

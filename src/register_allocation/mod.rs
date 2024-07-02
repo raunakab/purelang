@@ -1,14 +1,15 @@
 pub mod asm_pred_lang;
 
-pub type Source = crate::register_allocation::asm_pred_lang::AsmPredLang;
+pub type Source = asm_pred_lang::AsmPredLang;
 
-pub type Target =
-    crate::structured_control_flow::nested_asm_lang::NestedAsmLang;
+pub type Target = crate::structured_control_flow::Source;
 
-pub fn compile(p: Source) -> Target {
-    p.uncover_locals()
+pub fn compile(p: Source) -> Result<Target, String> {
+    let p = p
+        .uncover_locals()
         .undead_analysis()
         .conflict_analysis()
         .assign_registers()
-        .replace_locations()
+        .replace_locations();
+    Ok(p)
 }

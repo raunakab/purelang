@@ -22,7 +22,6 @@ impl ParenX64Fvars {
                 self::P::begin(ss) => {
                     let ss =
                         ss.into_iter().map(implement_s).collect::<Vec<_>>();
-
                     target::P::begin(ss)
                 },
             }
@@ -32,17 +31,14 @@ impl ParenX64Fvars {
             match s {
                 self::S::set_fvar_int32 { fvar, int32 } => {
                     let addr = implement_fvar(fvar);
-
                     target::S::set_addr_int32 { addr, int32 }
                 },
                 self::S::set_fvar_trg { fvar, trg } => {
                     let addr = implement_fvar(fvar);
-
                     target::S::set_addr_trg { addr, trg }
                 },
                 self::S::set_reg_loc { reg, loc } => {
                     let loc = implement_loc(loc);
-
                     target::S::set_reg_loc { reg, loc }
                 },
                 self::S::set_reg_triv { reg, triv } => {
@@ -53,18 +49,15 @@ impl ParenX64Fvars {
                 },
                 self::S::set_reg_binop_reg_loc { reg, binop, loc } => {
                     let loc = implement_loc(loc);
-
                     target::S::set_reg_binop_reg_loc { reg, binop, loc }
                 },
                 self::S::with_label { label, s } => {
                     let s = implement_s(*s);
-
                     let s = Box::new(s);
-
                     target::S::with_label { label, s }
                 },
-                self::S::jump(trg) => target::S::jump_trg(trg),
-                self::S::compare_reg_opand_jump_if {
+                self::S::jump(trg) => target::S::jump(trg),
+                self::S::compare {
                     reg,
                     opand,
                     relop,
@@ -81,9 +74,7 @@ impl ParenX64Fvars {
 
         fn implement_fvar(utils::Fvar(index): utils::Fvar) -> utils::Addr {
             let fbp = utils::Reg::current_frame_base_pointer();
-
             let disp_offset = index * 8;
-
             utils::Addr { fbp, disp_offset }
         }
 
@@ -92,14 +83,12 @@ impl ParenX64Fvars {
                 self::Loc::reg(reg) => target::Loc::reg(reg),
                 self::Loc::fvar(fvar) => {
                     let addr = implement_fvar(fvar);
-
                     target::Loc::addr(addr)
                 },
             }
         }
 
         let p = implement_p(p);
-
         target::ParenX64(p)
     }
 }

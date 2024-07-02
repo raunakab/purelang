@@ -7,11 +7,12 @@ macro_rules! make_begins {
             0 => $end,
             _ => {
                 let t = if let $lang::$atom::begin {
-                    effects: t_effects,
+                    effects: mut t_effects,
                     $t,
                 } = $end
                 {
-                    $effects.extend(t_effects);
+                    t_effects.extend($effects);
+                    $effects = t_effects;
                     $t
                 } else {
                     Box::new($end)
@@ -28,8 +29,8 @@ macro_rules! make_begins {
 
 macro_rules! thrush {
     ($p:ident => $($phase:expr)=>*) => ({
-        $(let $p = $phase($p);)*
-        $p
+        $(let $p = $phase($p)?;)*
+        Ok($p)
     });
 }
 
@@ -41,15 +42,16 @@ mod tests;
 pub mod utils;
 pub mod x64;
 
-type Source = crate::imperative_abstractions::values_lang::ValuesLang;
+type Source = crate::imperative_abstractions::Source;
 
-type Target = crate::x64::paren_x64::ParenX64;
+type Target = crate::x64::Target;
 
-pub fn compile(p: Source) -> Target {
+pub fn compile(p: Source) -> Result<Target, String> {
     thrush!(
         p
             => imperative_abstractions::compile
             => register_allocation::compile
             => structured_control_flow::compile
+            => x64::compile
     )
 }

@@ -6,6 +6,7 @@ pub use self::data::*;
 use crate::structured_control_flow::block_pred_lang as target;
 use crate::utils;
 
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub struct NestedAsmLang(pub self::P);
 
 impl NestedAsmLang {

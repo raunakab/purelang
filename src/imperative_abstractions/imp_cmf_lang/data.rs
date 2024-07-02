@@ -2,7 +2,13 @@ use crate::utils;
 
 #[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum P {
-    module(Tail),
+    module { lambdas: Vec<Lambda>, tail: Tail },
+}
+
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
+pub struct Lambda {
+    pub label: utils::Label,
+    pub tail: Tail,
 }
 
 #[cfg_attr(test, derive(Debug, PartialEq, Eq))]
@@ -17,14 +23,18 @@ pub enum Tail {
         tail1: Box<Self>,
         tail2: Box<Self>,
     },
+    jump {
+        trg: u8,
+        locs: Vec<u8>,
+    },
 }
 
 #[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum Pred {
     relop {
         relop: utils::Relop,
-        triv1: Triv,
-        triv2: Triv,
+        opand1: Opand,
+        opand2: Opand,
     },
     r#true,
     r#false,
@@ -57,11 +67,17 @@ pub enum Effect {
 #[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum Value {
     triv(Triv),
-    binop_triv_triv {
+    binop {
         binop: utils::Binop,
-        triv1: Triv,
-        triv2: Triv,
+        opand1: Opand,
+        opand2: Opand,
     },
 }
 
-pub type Triv = super::target::Triv;
+pub type Opand = super::target::Triv;
+
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
+pub enum Triv {
+    opand(Opand),
+    label(utils::Label),
+}

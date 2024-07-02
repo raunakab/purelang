@@ -62,7 +62,7 @@ impl ParenX64 {
 
         fn check_jumps(s: &self::S, labels: &LabelStore) -> Result<(), String> {
             match s {
-                self::S::jump_trg(trg) => check_trg(trg, labels),
+                self::S::jump(trg) => check_trg(trg, labels),
                 self::S::compare_reg_opand_jump_if { label, .. } => {
                     check_label(label, labels)
                 },
@@ -165,7 +165,7 @@ impl ParenX64 {
 
                     format!("{}:\n{}", label, s)
                 },
-                self::S::jump_trg(trg) => {
+                self::S::jump(trg) => {
                     let trg = generate_trg(trg);
 
                     format!("\tjmp {}", trg)
@@ -343,7 +343,7 @@ impl ParenX64 {
                     let s = *s;
                     link_s(s, labels)
                 },
-                self::S::jump_trg(trg) => {
+                self::S::jump(trg) => {
                     let trg = link_trg(trg, labels);
                     target::S::jump_trg(trg)
                 },
